@@ -2,6 +2,8 @@ import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/widgets/date_field.dart';
+import 'package:flowday/widgets/priority_widget.dart';
 import 'package:flutter/material.dart';
 
 class CreateOrEditTaskView extends StatefulWidget {
@@ -16,6 +18,9 @@ class CreateOrEditTaskView extends StatefulWidget {
 class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
+  Priority selectedPriority = Priority.none;
+  DateTime? startDate;
+  DateTime? endDate;
 
   @override
   void initState() {
@@ -24,6 +29,10 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
     descriptionController = TextEditingController(
       text: widget.task?.description ?? '',
     );
+    selectedPriority = widget.task?.priority ?? Priority.none;
+
+    startDate = widget.task?.startDate;
+    endDate = widget.task?.endDate;
   }
 
   @override
@@ -39,50 +48,188 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
       child: Container(
         decoration: const BoxDecoration(gradient: AppGradients.background),
         child: Scaffold(
+          extendBody: true,
           backgroundColor: Colors.transparent,
-          extendBodyBehindAppBar: true,
+
           appBar: AppBar(
             elevation: 0,
             foregroundColor: Colors.white,
-            title: Text(
-              'Criar/Editar',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.95)),
-            ),
             backgroundColor: Colors.transparent,
           ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.95),
+          body: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: .spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: 120,
+                            height: 30,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade800,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<Priority>(
+                                  isExpanded: true,
+                                  isDense: true,
+                                  dropdownColor: Colors.grey.shade900,
+                                  value: selectedPriority == Priority.none
+                                      ? null
+                                      : selectedPriority,
+                                  hint: const Text(
+                                    'Prioridade',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  iconSize: 20,
+
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+
+                                  items: Priority.values.map((p) {
+                                    return DropdownMenuItem(
+                                      value: p,
+                                      child: p.widget,
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedPriority = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(width: 8),
+
+                          SizedBox(
+                            width: 100,
+                            height: 30,
+                            child: dateFiled(
+                              label: "Início",
+                              date: startDate,
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2030),
+                                  builder: (context, child) {
+                                    return Theme(
+                                      data: Theme.of(context).copyWith(
+                                        colorScheme: const ColorScheme.dark(
+                                          primary: Colors.deepPurple,
+                                          onPrimary: Colors.white,
+                                          surface: Color(0xFF1E1E1E),
+                                          onSurface: Colors.white,
+                                        ),
+                                        dialogTheme: DialogThemeData(
+                                          backgroundColor: Color(0xFF1E1E1E),
+                                        ),
+                                      ),
+                                      child: child!,
+                                    );
+                                  },
+                                );
+
+                                if (picked != null) {
+                                  setState(() => startDate = picked);
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 8),
+
+                          SizedBox(
+                            width: 100,
+                            height: 30,
+                            child: dateFiled(
+                              label: "Fim",
+                              date: endDate,
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2030),
+                                  builder: (context, child) {
+                                    return Theme(
+                                      data: Theme.of(context).copyWith(
+                                        colorScheme: const ColorScheme.dark(
+                                          primary: Colors.deepPurple,
+                                          onPrimary: Colors.white,
+                                          surface: Color(0xFF1E1E1E),
+                                          onSurface: Colors.white,
+                                        ),
+                                        dialogTheme: DialogThemeData(
+                                          backgroundColor: Color(0xFF1E1E1E),
+                                        ),
+                                      ),
+                                      child: child!,
+                                    );
+                                  },
+                                );
+
+                                if (picked != null) {
+                                  setState(() => endDate = picked);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      controller: titleController,
-                      decoration: InputDecoration(
-                        labelText: "Titulo...",
-                        labelStyle: TextStyle(
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: TextField(
+                        style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.95),
+                        ),
+                        controller: titleController,
+                        decoration: InputDecoration(
+                          labelText: "Titulo...",
+                          labelStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.95),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      controller: descriptionController,
-                      maxLines: 10,
-                      decoration: InputDecoration(
-                        labelText: "Escrever...",
-                        labelStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.95),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: TextField(
+                        style: TextStyle(color: Colors.white),
+                        controller: descriptionController,
+                        maxLines: 10,
+                        decoration: InputDecoration(
+                          alignLabelWithHint: true,
+                          labelText: "Descrição...",
+                          labelStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.95),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -95,10 +242,27 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
               final title = titleController.text.trim();
               final description = descriptionController.text.trim();
               final newTask = Task(
-                id: widget.task?.id ?? 'Teste',
+                id: widget.task?.id ?? '',
                 title: title,
                 description: description,
+                createdAt: widget.task?.createdAt ?? DateTime.now(),
+                updatedAt: DateTime.now(),
+                priority: selectedPriority,
+                startDate: startDate,
+                endDate: endDate,
               );
+              if (startDate != null &&
+                  endDate != null &&
+                  endDate!.isBefore(startDate!)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "A data de término não pode ser antes da data de início",
+                    ),
+                  ),
+                );
+                return;
+              }
               if (widget.task == null) {
                 widget.controller.addTask(newTask);
               } else {

@@ -1,6 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class GlassContainer extends StatelessWidget {
@@ -15,9 +13,9 @@ class GlassContainer extends StatelessWidget {
     super.key,
     required this.child,
     this.blur = 12,
-    this.opacity = 0.10,
+    this.opacity = 0.20,
     this.padding = const .all(16),
-    this.margin = const .all(8),
+    this.margin = const .all(0),
     this.borderRadius = const .all(.circular(16)),
   });
 

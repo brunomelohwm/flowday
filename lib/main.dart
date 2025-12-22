@@ -1,17 +1,26 @@
+import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
-import 'package:flowday/views/home_tasks_view.dart';
+import 'package:flowday/views/splash_view.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final taskController = TaskController();
   await taskController.loadTasks();
-  runApp(FlowDayApp(controller: taskController));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider.value(value: taskController),
+      ],
+      child: const FlowDayApp(),
+    ),
+  );
 }
 
 class FlowDayApp extends StatelessWidget {
-  final TaskController controller;
-  const FlowDayApp({super.key, required this.controller});
+  const FlowDayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +33,7 @@ class FlowDayApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: HomeTasksView(controller: controller),
+      home: const SplashView(),
     );
   }
 }
