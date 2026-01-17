@@ -11,7 +11,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR', null);
   final taskController = TaskController();
-  await taskController.loadTasks();
   runApp(
     MultiProvider(
       providers: [
@@ -40,7 +39,7 @@ class FlowDayApp extends StatelessWidget {
           seedColor: Colors.blue,
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: Colors.white,       
+        scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,

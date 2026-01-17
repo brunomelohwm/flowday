@@ -18,13 +18,19 @@ class SplashView extends StatelessWidget {
           child: Consumer<AuthController>(
             builder: (context, auth, _) {
               if (auth.isLoading) {
-                return const CircularProgressIndicator(color: Color(0xFF212121));
+                return const CircularProgressIndicator(
+                  color: Color(0xFF212121),
+                );
               }
 
-                final taskController = context.read<TaskController>();
+              final taskController = context.read<TaskController>();
 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (auth.isAuthenticated) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                if (auth.isAuthenticated && auth.currentUser != null) {
+                  taskController.setUserId(auth.currentUser!.id);
+                  await taskController.loadTasks();
+
+                  if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -32,13 +38,16 @@ class SplashView extends StatelessWidget {
                             MainShellView(taskController: taskController),
                       ),
                     );
-                  } else {
+                  }
+                } else {
+                  if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (_) => const LoginView()),
                     );
                   }
-                });
+                }
+              });
 
               return const SizedBox.shrink();
             },
