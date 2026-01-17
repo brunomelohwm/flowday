@@ -13,12 +13,12 @@ Widget buildDateInfo(Task task) {
   if (start != null && end != null) {
     return Text(
       "${formatMonthDay(start)} - ${formatMonthDay(end)}",
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFF757575), fontSize: 12),
     );
   }
 
   return Text(
     formatMonthDay(start ?? end!),
-    style: const TextStyle(color: Colors.white),
+    style: const TextStyle(color: Color(0xFF757575), fontSize: 12),
   );
 }

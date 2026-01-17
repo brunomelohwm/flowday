@@ -1,13 +1,16 @@
 import 'package:flowday/controllers/task_controller.dart';
+import 'package:flowday/themes/app_background.dart';
+import 'package:flowday/views/calendar_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/views/home_tasks_view.dart';
 import 'package:flowday/views/profile_page.dart';
 import 'package:flowday/widgets/flow_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class MainShellView extends StatefulWidget {
-  const MainShellView({super.key});
+  final TaskController taskController;
+
+  const MainShellView({super.key, required this.taskController});
 
   @override
   State<MainShellView> createState() => _MainShellViewState();
@@ -19,35 +22,38 @@ class _MainShellViewState extends State<MainShellView> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeTasksView(controller: context.read<TaskController>()),
-      Placeholder(), // Calendário depois
-      ProfileView(),
+      HomeTasksView(controller: widget.taskController),
+      CalendarView(),
+      const ProfileView(),
     ];
-    return Scaffold(
-      extendBody: true,
-      body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: FlowBottomBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
 
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CreateOrEditTaskView(
-                controller: context.read<TaskController>(),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: IndexedStack(index: _currentIndex, children: pages),
+        ),
+        bottomNavigationBar: FlowBottomBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    CreateOrEditTaskView(controller: widget.taskController),
               ),
-            ),
-          );
-        },
-        child: Icon(Icons.add, color: Colors.black),
+            );
+          },
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

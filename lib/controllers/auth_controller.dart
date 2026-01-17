@@ -38,6 +38,8 @@ class AuthController extends ChangeNotifier {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('isLogged');
+    _isAutenticated = false;
+    _isLoading = false;
     notifyListeners();
   }
 }

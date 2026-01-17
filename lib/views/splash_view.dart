@@ -1,9 +1,8 @@
 import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
-import 'package:flowday/themes/app_colors.dart';
-import 'package:flowday/views/home_tasks_view.dart';
 import 'package:flowday/views/login_view.dart';
+import 'package:flowday/views/main_shell_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,16 +12,14 @@ class SplashView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBackground(
-      child: Container(
-        decoration: const BoxDecoration(gradient: AppGradients.background),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Center(
-            child: Consumer<AuthController>(
-              builder: (context, auth, _) {
-                if (auth.isLoading) {
-                  return const CircularProgressIndicator(color: Colors.white);
-                }
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Consumer<AuthController>(
+            builder: (context, auth, _) {
+              if (auth.isLoading) {
+                return const CircularProgressIndicator(color: Color(0xFF212121));
+              }
 
                 final taskController = context.read<TaskController>();
 
@@ -32,7 +29,7 @@ class SplashView extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            HomeTasksView(controller: taskController),
+                            MainShellView(taskController: taskController),
                       ),
                     );
                   } else {
@@ -43,9 +40,8 @@ class SplashView extends StatelessWidget {
                   }
                 });
 
-                return const SizedBox.shrink();
-              },
-            ),
+              return const SizedBox.shrink();
+            },
           ),
         ),
       ),

@@ -52,7 +52,7 @@ class FlowBottomBar extends StatelessWidget {
       child: Icon(
         icon,
         size: 22,
-        color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.5),
+        color: isActive ? const Color(0xFF212121) : const Color(0xFF757575),
       ),
     );
   }
