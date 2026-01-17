@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flowday/Utils/build_date_info.dart';
 import 'package:flowday/widgets/priority_widget.dart';
 import 'package:flutter/material.dart';
@@ -42,23 +41,23 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
       onLongPress: () {
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            backgroundColor: Colors.transparent,
-            title: Text(
+            builder: (_) => AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text(
               "Excluir Tarefa?",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Color(0xFF212121)),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text("Cancelar"),
+                child: const Text("Cancelar", style: TextStyle(color: Color(0xFF757575))),
               ),
               ElevatedButton(
                 onPressed: () {
                   widget.controller.removeTask(widget.task.id);
                   Navigator.pop(context);
                 },
-                child: Text("Ecluir"),
+                child: const Text("Excluir"),
               ),
             ],
           ),
@@ -77,28 +76,27 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
               Text(
                 widget.task.title,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
                   fontSize: 18,
-                  color: Colors.white.withValues(alpha: 0.95),
+                  color: Color(0xFF212121),
                 ),
               ),
               Row(
                 children: [
-                  Icon(Icons.timer_outlined, color: Colors.white),
+                  const Icon(Icons.timer_outlined, color: Color(0xFF757575), size: 18),
+                  const SizedBox(width: 4),
                   buildDateInfo(widget.task),
                 ],
               ),
               if (widget.task.endDate != null)
                 Text(
                   "Due Date: ${formatMonthDay(widget.task.endDate!)}",
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Color(0xFF757575), fontSize: 12),
                 ),
               Text(
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.80)),
-
                 'Descrição...',
-
+                style: const TextStyle(color: Color(0xFF757575), fontSize: 14),
                 overflow: expanded
                     ? TextOverflow.visible
                     : TextOverflow.ellipsis,
