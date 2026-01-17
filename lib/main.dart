@@ -2,15 +2,19 @@ import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/views/splash_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('pt_BR', null);
   final taskController = TaskController();
   await taskController.loadTasks();
   runApp(
     MultiProvider(
-      providers: [   
+      providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider.value(value: taskController),
       ],
@@ -21,17 +25,22 @@ void main() async {
 
 class FlowDayApp extends StatelessWidget {
   const FlowDayApp({super.key});
-   
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: Colors.white,       
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -71,7 +80,7 @@ class FlowDayApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const SplashView(), 
+      home: const SplashView(),
     );
   }
 }
