@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
@@ -32,19 +33,26 @@ class _LoginViewState extends State<LoginView> {
     }
 
     final auth = context.read<AuthController>();
-    final error = await auth.login(
+    await auth.login(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
     );
 
-    if (error != null && mounted) {
+    if (!mounted) return;
+
+    if (auth.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(auth.errorMessage!),
+          backgroundColor: Colors.red,
+        ),
       );
-    } else if (mounted && auth.isAuthenticated) {
+    } else if (auth.isAuthenticated) {
       final taskController = context.read<TaskController>();
-      taskController.setUserId(auth.currentUser?.id);
-      await taskController.loadTasks();
+      taskController.setUserId(auth.currentUser?.uid);
+    
+
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
@@ -90,9 +98,7 @@ class _LoginViewState extends State<LoginView> {
                       if (value == null || value.isEmpty) {
                         return 'Email é obrigatório';
                       }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
+                      if (!EmailValidator.validate(value)) {
                         return 'Email inválido';
                       }
                       return null;

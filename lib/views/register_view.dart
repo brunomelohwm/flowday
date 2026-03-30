@@ -1,10 +1,11 @@
-import 'package:flowday/controllers/auth_controller.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -20,6 +21,7 @@ class _RegisterViewState extends State<RegisterView> {
   final confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,25 +32,22 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    final auth = context.read<AuthController>();
+    setState(() => _isLoading = true);
     final taskController = context.read<TaskController>();
-    final error = await auth.register(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-      confirmPassword: confirmPasswordController.text.trim(),
-    );
 
-    if (error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.red),
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
-    } else if (mounted && auth.isAuthenticated) {
-      taskController.setUserId(auth.currentUser?.id);
-      await taskController.loadTasks();
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      taskController.setUserId(user?.uid);
+
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
@@ -56,13 +55,20 @@ class _RegisterViewState extends State<RegisterView> {
           builder: (_) => MainShellView(taskController: taskController),
         ),
       );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Erro ao criar conta'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
-
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -99,9 +105,7 @@ class _RegisterViewState extends State<RegisterView> {
                       if (value == null || value.isEmpty) {
                         return 'Email é obrigatório';
                       }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value)) {
+                      if (!EmailValidator.validate(value)) {
                         return 'Email inválido';
                       }
                       return null;
@@ -180,8 +184,8 @@ class _RegisterViewState extends State<RegisterView> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: auth.isLoading ? null : _handleRegister,
-                      child: auth.isLoading
+                      onPressed: _isLoading ? null : _handleRegister,
+                      child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('Criar Conta'),
                     ),

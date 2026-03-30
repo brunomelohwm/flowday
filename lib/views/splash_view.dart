@@ -27,8 +27,8 @@ class SplashView extends StatelessWidget {
 
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 if (auth.isAuthenticated && auth.currentUser != null) {
-                  taskController.setUserId(auth.currentUser!.id);
-                  await taskController.loadTasks();
+                  taskController.setUserId(auth.currentUser!.uid);
+                  
 
                   if (context.mounted) {
                     Navigator.pushReplacement(

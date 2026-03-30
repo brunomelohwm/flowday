@@ -1,15 +1,15 @@
-import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
+    final user = FirebaseAuth.instance.currentUser;
     final taskController = context.read<TaskController>();
 
     return Scaffold(
@@ -22,7 +22,7 @@ class ProfileView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (auth.currentUser != null) ...[
+            if (user != null) ...[
               const Text(
                 'Informações da Conta',
                 style: TextStyle(
@@ -47,7 +47,7 @@ class ProfileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        auth.currentUser!.email,
+                        user.email ?? '',
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color(0xFF212121),
@@ -66,7 +66,7 @@ class ProfileView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () async {
                   taskController.setUserId(null);
-                  await auth.logout();
+                  await FirebaseAuth.instance.signOut();
                   if (context.mounted) {
                     Navigator.pushAndRemoveUntil(
                       context,

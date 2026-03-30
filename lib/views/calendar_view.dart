@@ -33,8 +33,7 @@ class _CalendarViewState extends State<CalendarView> {
   void _scrollToSelectedDate() {
     final daysDifference = _selectedDate.difference(DateTime.now()).inDays;
     if (daysDifference >= -15 && daysDifference <= 14) {
-      final scrollPosition =
-          (daysDifference + 15) * 68.0; // 60 width + 8 margin
+      final scrollPosition = (daysDifference + 15) * 68.0;
       _scrollController.animateTo(
         scrollPosition,
         duration: const Duration(milliseconds: 300),
@@ -62,7 +61,6 @@ class _CalendarViewState extends State<CalendarView> {
     final Map<DateTime, List<Task>> grouped = {};
 
     for (var task in tasks) {
-      // Use startDate if available, otherwise use endDate, otherwise skip
       DateTime? taskDate;
       if (task.startDate != null) {
         taskDate = DateTime(
@@ -97,7 +95,6 @@ class _CalendarViewState extends State<CalendarView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          // Month and Year header with date picker
           Row(
             children: [
               GestureDetector(
@@ -124,13 +121,12 @@ class _CalendarViewState extends State<CalendarView> {
             ],
           ),
           const SizedBox(height: 20),
-          // Day carousel
           SizedBox(
             height: 80,
             child: ListView.builder(
               controller: _scrollController,
               scrollDirection: Axis.horizontal,
-              itemCount: 30, // Show 30 days (15 before and 15 after today)
+              itemCount: 30,
               itemBuilder: (context, index) {
                 final dayDate = DateTime.now().add(Duration(days: index - 15));
                 final isSelected =
@@ -195,7 +191,7 @@ class _CalendarViewState extends State<CalendarView> {
             ),
           ),
           const SizedBox(height: 20),
-          // Tasks grouped by date
+
           Expanded(
             child: AnimatedBuilder(
               animation: taskController,
@@ -203,7 +199,6 @@ class _CalendarViewState extends State<CalendarView> {
                 final tasks = taskController.tasks;
                 final groupedTasks = _groupTasksByDate(tasks);
 
-                // Get tasks for the selected date
                 final selectedDateKey = DateTime(
                   _selectedDate.year,
                   _selectedDate.month,

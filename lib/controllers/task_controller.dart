@@ -1,14 +1,15 @@
-import 'dart:convert';
+import 'dart:async';
 
-import 'package:flowday/models/task.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flowday/models/task.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends ChangeNotifier {
   final List<Task> _allTasks = [];
   String? _currentUserId;
-  var uuid = Uuid();
+  final uuid = Uuid();
+  StreamSubscription<QuerySnapshot>? _tasksSubscription;
 
   List<Task> get tasks {
     if (_currentUserId == null) return [];
@@ -17,61 +18,76 @@ class TaskController extends ChangeNotifier {
 
   void setUserId(String? userId) {
     _currentUserId = userId;
-    notifyListeners();
-  }
 
-  void addTask(Task task) {
-    if (_currentUserId == null) return;
-    final newTask = task.copyWith(id: uuid.v4(), userId: _currentUserId!);
-    _allTasks.add(newTask);
-    notifyListeners();
-    _saveTasks();
-  }
-
-  void updateTask(Task updateTask) {
-    if (_currentUserId == null || updateTask.userId != _currentUserId) return;
-    final index = _allTasks.indexWhere((task) => task.id == updateTask.id);
-    if (index != -1) {
-      _allTasks[index] = updateTask;
-      notifyListeners();
-      _saveTasks();
+   
+    _allTasks.clear();
+    _tasksSubscription?.cancel();
+    if (_currentUserId != null) {
+      _subscribeToTasks();
     }
+    notifyListeners();
   }
 
-  void removeTask(String taskId) {
+  void _subscribeToTasks() {
+    _tasksSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+          _allTasks
+            ..clear()
+            ..addAll(snapshot.docs.map((doc) => Task.fromMap(doc.data())));
+          notifyListeners();
+        });
+  }
+
+  Future<void> addTask(Task task) async {
     if (_currentUserId == null) return;
-    _allTasks.removeWhere(
-      (task) => task.id == taskId && task.userId == _currentUserId,
+
+    final newTask = task.copyWith(
+      id: uuid.v4(),
+      userId: _currentUserId!,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
-    notifyListeners();
-    _saveTasks();
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(newTask.id)
+        .set(newTask.toMap());
   }
 
-  Future<void> _saveTasks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = _allTasks.map((t) => t.toMap()).toList();
-    prefs.setString('tasks', jsonEncode(list));
+  Future<void> updateTask(Task task) async {
+    if (_currentUserId == null || task.userId != _currentUserId) return;
+
+    final updatedTask = task.copyWith(updatedAt: DateTime.now());
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(task.id)
+        .update(updatedTask.toMap());
   }
 
-  Future<void> loadTasks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('tasks');
+  Future<void> removeTask(String taskId) async {
+    if (_currentUserId == null) return;
 
-    if (jsonString != null) {
-      final decoded = jsonDecode(jsonString) as List;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(taskId)
+        .delete();
+  }
 
-      _allTasks
-        ..clear()
-        ..addAll(
-          decoded.map((map) {
-            // Handle backward compatibility - if userId is missing, assign to current user
-            if (map['userId'] == null && _currentUserId != null) {
-              map['userId'] = _currentUserId;
-            }
-            return Task.fromMap(map);
-          }).toList(),
-        );
-      notifyListeners();
-    }
+  @override
+  void dispose() {
+    _tasksSubscription?.cancel();
+    super.dispose();
   }
 }

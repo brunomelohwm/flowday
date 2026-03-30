@@ -233,7 +233,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
             final description = descriptionController.text.trim();
             final newTask = Task(
               id: widget.task?.id ?? '',
-              userId: auth.currentUser!.id,
+              userId: auth.currentUser!.uid,
               title: title,
               description: description,
               createdAt: widget.task?.createdAt ?? DateTime.now(),
