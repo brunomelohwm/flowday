@@ -74,11 +74,9 @@ class FlowBarClipper extends CustomClipper<Path> {
 
     path.moveTo(0, slope);
 
-    // canto esquerdo chanfrado
     path.lineTo(slope, 0);
     path.lineTo(centerX - notchRadius - 12, 0);
 
-    // curva do encaixe do FAB
     path.quadraticBezierTo(
       centerX - notchRadius,
       0,
@@ -99,11 +97,9 @@ class FlowBarClipper extends CustomClipper<Path> {
       0,
     );
 
-    // canto direito chanfrado
     path.lineTo(size.width - slope, 0);
     path.lineTo(size.width, slope);
 
-    // base
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
     path.close();

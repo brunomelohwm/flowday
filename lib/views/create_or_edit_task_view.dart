@@ -1,9 +1,11 @@
+import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/widgets/date_field.dart';
 import 'package:flowday/widgets/priority_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CreateOrEditTaskView extends StatefulWidget {
   final Task? task;
@@ -224,10 +226,14 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
           backgroundColor: const Color(0xFF212121),
           child: const Icon(Icons.check, color: Colors.white),
           onPressed: () {
+            final auth = context.read<AuthController>();
+            if (auth.currentUser == null) return;
+
             final title = titleController.text.trim();
             final description = descriptionController.text.trim();
             final newTask = Task(
               id: widget.task?.id ?? '',
+              userId: auth.currentUser!.uid,
               title: title,
               description: description,
               createdAt: widget.task?.createdAt ?? DateTime.now(),

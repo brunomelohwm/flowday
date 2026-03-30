@@ -1,56 +1,51 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
+import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
-import 'package:flowday/views/register_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _RegisterViewState extends State<RegisterView> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    final auth = context.read<AuthController>();
-    await auth.login(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    );
+    setState(() => _isLoading = true);
+    final taskController = context.read<TaskController>();
 
-    if (!mounted) return;
-
-    if (auth.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(auth.errorMessage!),
-          backgroundColor: Colors.red,
-        ),
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
-    } else if (auth.isAuthenticated) {
-      final taskController = context.read<TaskController>();
-      taskController.setUserId(auth.currentUser?.uid);
-    
+
+      final user = FirebaseAuth.instance.currentUser;
+
+      taskController.setUserId(user?.uid);
 
       if (!mounted) return;
 
@@ -60,13 +55,20 @@ class _LoginViewState extends State<LoginView> {
           builder: (_) => MainShellView(taskController: taskController),
         ),
       );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Erro ao criar conta'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
-
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -86,6 +88,11 @@ class _LoginViewState extends State<LoginView> {
                       color: Color(0xFF212121),
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Criar nova conta',
+                    style: TextStyle(fontSize: 16, color: Color(0xFF757575)),
                   ),
                   const SizedBox(height: 32),
 
@@ -131,6 +138,42 @@ class _LoginViewState extends State<LoginView> {
                       if (value == null || value.isEmpty) {
                         return 'Senha é obrigatória';
                       }
+                      if (value.length < 6) {
+                        return 'Senha deve ter pelo menos 6 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
+                    style: const TextStyle(color: Color(0xFF212121)),
+                    decoration: InputDecoration(
+                      labelText: 'Confirmar Senha',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: const Color(0xFF757575),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Confirmação de senha é obrigatória';
+                      }
+                      if (value != passwordController.text) {
+                        return 'As senhas não coincidem';
+                      }
                       return null;
                     },
                   ),
@@ -141,10 +184,10 @@ class _LoginViewState extends State<LoginView> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: auth.isLoading ? null : _handleLogin,
-                      child: auth.isLoading
+                      onPressed: _isLoading ? null : _handleRegister,
+                      child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Entrar'),
+                          : const Text('Criar Conta'),
                     ),
                   ),
 
@@ -154,11 +197,11 @@ class _LoginViewState extends State<LoginView> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const RegisterView()),
+                        MaterialPageRoute(builder: (_) => const LoginView()),
                       );
                     },
                     child: const Text(
-                      'Não tem uma conta? Criar conta',
+                      'Já tem uma conta? Entrar',
                       style: TextStyle(color: Color(0xFF212121)),
                     ),
                   ),

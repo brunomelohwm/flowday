@@ -1,55 +1,93 @@
-import 'dart:convert';
+import 'dart:async';
 
-import 'package:flowday/models/task.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flowday/models/task.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends ChangeNotifier {
-  final List<Task> _tasks = [];
-  var uuid = Uuid();
+  final List<Task> _allTasks = [];
+  String? _currentUserId;
+  final uuid = Uuid();
+  StreamSubscription<QuerySnapshot>? _tasksSubscription;
 
-  List<Task> get tasks => _tasks;
-
-  void addTask(Task task) {
-    final newTask = task.copyWith(id: uuid.v4());
-    _tasks.add(newTask);
-    notifyListeners();
-    _saveTasks();
+  List<Task> get tasks {
+    if (_currentUserId == null) return [];
+    return _allTasks.where((task) => task.userId == _currentUserId).toList();
   }
 
-  void updateTask(Task updateTask) {
-    final index = _tasks.indexWhere((task) => task.id == updateTask.id);
-    if (index != -1) {
-      _tasks[index] = updateTask;
-      notifyListeners();
-      _saveTasks();
+  void setUserId(String? userId) {
+    _currentUserId = userId;
+
+   
+    _allTasks.clear();
+    _tasksSubscription?.cancel();
+    if (_currentUserId != null) {
+      _subscribeToTasks();
     }
-  }
-
-  void removeTask(String taskId) {
-    _tasks.removeWhere((task) => task.id == taskId);
     notifyListeners();
-    _saveTasks();
   }
 
-  Future<void> _saveTasks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = tasks.map((t) => t.toMap()).toList();
-    prefs.setString('tasks', jsonEncode(list));
+  void _subscribeToTasks() {
+    _tasksSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+          _allTasks
+            ..clear()
+            ..addAll(snapshot.docs.map((doc) => Task.fromMap(doc.data())));
+          notifyListeners();
+        });
   }
 
-  Future<void> loadTasks() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('tasks');
+  Future<void> addTask(Task task) async {
+    if (_currentUserId == null) return;
 
-    if (jsonString != null) {
-      final decoded = jsonDecode(jsonString) as List;
+    final newTask = task.copyWith(
+      id: uuid.v4(),
+      userId: _currentUserId!,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
 
-      _tasks
-        ..clear()
-        ..addAll(decoded.map((map) => Task.fromMap(map)).toList());
-      notifyListeners();
-    }
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(newTask.id)
+        .set(newTask.toMap());
+  }
+
+  Future<void> updateTask(Task task) async {
+    if (_currentUserId == null || task.userId != _currentUserId) return;
+
+    final updatedTask = task.copyWith(updatedAt: DateTime.now());
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(task.id)
+        .update(updatedTask.toMap());
+  }
+
+  Future<void> removeTask(String taskId) async {
+    if (_currentUserId == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_currentUserId)
+        .collection('tasks')
+        .doc(taskId)
+        .delete();
+  }
+
+  @override
+  void dispose() {
+    _tasksSubscription?.cancel();
+    super.dispose();
   }
 }
