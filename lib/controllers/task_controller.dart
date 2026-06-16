@@ -48,9 +48,7 @@ class TaskController extends ChangeNotifier {
 
     final newTask = task.copyWith(
       id: uuid.v4(),
-      userId: _currentUserId!,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      userId: _currentUserId!,     
     );
 
     await FirebaseFirestore.instance
