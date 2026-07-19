@@ -147,7 +147,7 @@ class _CalendarViewState extends State<CalendarView> {
                   },
                   child: Container(
                     width: 60,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF212121)
@@ -208,11 +208,36 @@ class _CalendarViewState extends State<CalendarView> {
 
                 if (tasksForDate.isEmpty) {
                   return Center(
-                    child: Text(
-                      'Nenhuma tarefa para ${DateFormat('d/MM/yyyy', 'pt_BR').format(_selectedDate)}',
-                      style: const TextStyle(
-                        color: Color(0xFF757575),
-                        fontSize: 16,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.event_available_outlined,
+                            size: 44,
+                            color: Color(0xFF757575),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Nenhuma tarefa para ${DateFormat('d/MM/yyyy', 'pt_BR').format(_selectedDate)}.',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Color(0xFF212121),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Use o botão + para planejar esse dia.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF757575),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );

@@ -201,7 +201,8 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                     child: TextField(
                       style: const TextStyle(color: Color(0xFF212121)),
                       controller: titleController,
-                      decoration: const InputDecoration(labelText: "Titulo..."),
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(labelText: "Título..."),
                     ),
                   ),
                   Padding(
@@ -225,19 +226,28 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
           disabledElevation: 0,
           backgroundColor: const Color(0xFF212121),
           child: const Icon(Icons.check, color: Colors.white),
-          onPressed: () {
+          onPressed: () async {
             final auth = context.read<AuthController>();
             if (auth.currentUser == null) return;
 
             final title = titleController.text.trim();
             final description = descriptionController.text.trim();
+
+            if (title.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Informe um título para salvar a tarefa."),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
             final newTask = Task(
               id: widget.task?.id ?? '',
               userId: auth.currentUser!.uid,
               title: title,
               description: description,
-              createdAt: widget.task?.createdAt ?? DateTime.now(),
-              updatedAt: DateTime.now(),
               priority: selectedPriority,
               startDate: startDate,
               endDate: endDate,
@@ -254,11 +264,33 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
               );
               return;
             }
-            if (widget.task == null) {
-              widget.controller.addTask(newTask);
-            } else {
-              widget.controller.updateTask(newTask);
+            try {
+              if (widget.task == null) {
+                await widget.controller.addTask(newTask);
+              } else {
+                await widget.controller.updateTask(newTask);
+              }
+            } catch (_) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Não foi possível salvar a tarefa."),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
             }
+
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  widget.task == null
+                      ? "Tarefa criada com sucesso."
+                      : "Tarefa atualizada com sucesso.",
+                ),
+              ),
+            );
             Navigator.pop(context);
           },
         ),

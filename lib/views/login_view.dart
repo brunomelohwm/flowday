@@ -28,39 +28,99 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthController>();
-    await auth.login(
+    final loggedIn = await auth.login(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
     );
 
     if (!mounted) return;
 
-    if (auth.errorMessage != null) {
+    if (!loggedIn) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage!),
+          content: Text(auth.errorMessage ?? 'Erro ao entrar'),
           backgroundColor: Colors.red,
         ),
       );
-    } else if (auth.isAuthenticated) {
-      final taskController = context.read<TaskController>();
-      taskController.setUserId(auth.currentUser?.uid);
-    
+      return;
+    }
 
+    final taskController = context.read<TaskController>();
+    taskController.setUserId(auth.currentUser?.uid);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MainShellView(taskController: taskController),
+      ),
+    );
+  }
+
+  Future<void> _handlePasswordReset() async {
+    final initialEmail = emailController.text.trim();
+    String email = initialEmail;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('Recuperar senha'),
+          content: TextField(
+            controller: TextEditingController(text: email),
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(labelText: 'Email da conta'),
+            onChanged: (value) => email = value.trim(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, null),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, email.trim());
+              },
+              child: const Text('Enviar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == null || result.isEmpty) return;
+
+    if (!EmailValidator.validate(result)) {
       if (!mounted) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MainShellView(taskController: taskController),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Informe um email válido para recuperar a senha.'),
+          backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+    if (!mounted) return;
+
+    final auth = context.read<AuthController>();
+    final sent = await auth.sendPasswordResetEmail(result);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          sent
+              ? 'Enviamos um link de recuperação para o email informado.'
+              : auth.errorMessage ?? 'Não foi possível enviar o email.',
+        ),
+        backgroundColor: sent ? null : Colors.red,
+      ),
+    );
   }
 
   @override
@@ -88,7 +148,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   TextFormField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -104,9 +163,7 @@ class _LoginViewState extends State<LoginView> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: passwordController,
                     obscureText: _obscurePassword,
@@ -134,9 +191,17 @@ class _LoginViewState extends State<LoginView> {
                       return null;
                     },
                   ),
-
-                  const SizedBox(height: 32),
-
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: auth.isLoading ? null : _handlePasswordReset,
+                      child: const Text(
+                        'Esqueci minha senha',
+                        style: TextStyle(color: Color(0xFF212121)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -147,16 +212,18 @@ class _LoginViewState extends State<LoginView> {
                           : const Text('Entrar'),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const RegisterView()),
-                      );
-                    },
+                    onPressed: auth.isLoading
+                        ? null
+                        : () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterView(),
+                              ),
+                            );
+                          },
                     child: const Text(
                       'Não tem uma conta? Criar conta',
                       style: TextStyle(color: Color(0xFF212121)),
