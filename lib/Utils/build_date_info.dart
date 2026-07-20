@@ -1,4 +1,4 @@
-import 'package:flowday/Utils/date_formatters.dart';
+import 'package:flowday/utils/date_formatters.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flutter/material.dart';
 

@@ -19,7 +19,6 @@ class TaskController extends ChangeNotifier {
   void setUserId(String? userId) {
     _currentUserId = userId;
 
-   
     _allTasks.clear();
     _tasksSubscription?.cancel();
     if (_currentUserId != null) {
@@ -38,7 +37,11 @@ class TaskController extends ChangeNotifier {
         .listen((snapshot) {
           _allTasks
             ..clear()
-            ..addAll(snapshot.docs.map((doc) => Task.fromMap(doc.data())));
+            ..addAll(
+              snapshot.docs.map(
+                (doc) => Task.fromMap(doc.data(), id: doc.id),
+              ),
+            );
           notifyListeners();
         });
   }
@@ -46,10 +49,7 @@ class TaskController extends ChangeNotifier {
   Future<void> addTask(Task task) async {
     if (_currentUserId == null) return;
 
-    final newTask = task.copyWith(
-      id: uuid.v4(),
-      userId: _currentUserId!,     
-    );
+    final newTask = task.copyWith(id: uuid.v4(), userId: _currentUserId!);
 
     await FirebaseFirestore.instance
         .collection('users')

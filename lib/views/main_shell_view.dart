@@ -3,7 +3,7 @@ import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/views/calendar_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/views/home_tasks_view.dart';
-import 'package:flowday/views/profile_page.dart';
+import 'package:flowday/views/profile_view.dart';
 import 'package:flowday/widgets/flow_bottom_bar.dart';
 import 'package:flutter/material.dart';
 

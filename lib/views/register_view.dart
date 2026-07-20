@@ -1,11 +1,11 @@
 import 'package:email_validator/email_validator.dart';
+import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -19,56 +19,64 @@ class _RegisterViewState extends State<RegisterView> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
+  final lastNameController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    nameController.dispose();
+    lastNameController.dispose();
     super.dispose();
   }
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    final auth = context.read<AuthController>();
     final taskController = context.read<TaskController>();
 
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+    final registered = await auth.register(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+      name: nameController.text.trim(),
+      lastName: lastNameController.text.trim(),
+    );
 
-      final user = FirebaseAuth.instance.currentUser;
+    if (!mounted) return;
 
-      taskController.setUserId(user?.uid);
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MainShellView(taskController: taskController),
-        ),
-      );
-    } on FirebaseAuthException catch (e) {
+    if (!registered) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message ?? 'Erro ao criar conta'),
+          content: Text(auth.errorMessage ?? 'Erro ao criar conta'),
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      return;
     }
+
+    taskController.setUserId(auth.currentUser?.uid);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Conta criada com sucesso.')));
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MainShellView(taskController: taskController),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthController>();
+
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -95,7 +103,34 @@ class _RegisterViewState extends State<RegisterView> {
                     style: TextStyle(fontSize: 16, color: Color(0xFF757575)),
                   ),
                   const SizedBox(height: 32),
+                  TextFormField(
+                    controller: nameController,
+                    keyboardType: TextInputType.name,
+                    style: const TextStyle(color: Color(0xFF212121)),
+                    decoration: const InputDecoration(labelText: 'Nome'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nome é obrigatório';
+                      }
 
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: lastNameController,
+                    keyboardType: TextInputType.name,
+                    style: const TextStyle(color: Color(0xFF212121)),
+                    decoration: const InputDecoration(labelText: 'Sobrenome'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Sobrenome é obrigatório';
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -111,9 +146,7 @@ class _RegisterViewState extends State<RegisterView> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: passwordController,
                     obscureText: _obscurePassword,
@@ -144,9 +177,7 @@ class _RegisterViewState extends State<RegisterView> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 16),
-
                   TextFormField(
                     controller: confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
@@ -177,29 +208,29 @@ class _RegisterViewState extends State<RegisterView> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 32),
-
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleRegister,
-                      child: _isLoading
+                      onPressed: auth.isLoading ? null : _handleRegister,
+                      child: auth.isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('Criar Conta'),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginView()),
-                      );
-                    },
+                    onPressed: auth.isLoading
+                        ? null
+                        : () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginView(),
+                              ),
+                            );
+                          },
                     child: const Text(
                       'Já tem uma conta? Entrar',
                       style: TextStyle(color: Color(0xFF212121)),

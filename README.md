@@ -1,16 +1,74 @@
-# flowday
+# FlowDay
 
-A new Flutter project.
+FlowDay é um aplicativo Flutter simples para organização de tarefas diárias, com autenticação por email/senha e sincronização de dados no Firebase.
 
-## Getting Started
+O objetivo do projeto é servir como um app funcional de portfólio, pronto para evoluir com novas funcionalidades sem mudar a base principal.
 
-This project is a starting point for a Flutter application.
+## Funcionalidades
 
-A few resources to get you started if this is your first Flutter project:
+- Cadastro e login com Firebase Authentication.
+- Recuperação de senha por email.
+- Criação, edição e exclusão de tarefas.
+- Listagem de tarefas em tempo real com Cloud Firestore.
+- Visualização de tarefas por calendário.
+- Perfil com opção de sair e excluir conta.
+- Exclusão de conta remove também o documento do usuário e suas tarefas.
+- Validações básicas para evitar tarefas sem título.
+- Estados vazios amigáveis para o primeiro uso.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Stack
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter
+- Provider
+- Firebase Authentication
+- Cloud Firestore
+- Intl
+- Email Validator
+
+## Estrutura de Dados
+
+As tarefas são salvas no Firestore mantendo a estrutura:
+
+```text
+users/{uid}/tasks/{taskId}
+```
+
+Cada usuário possui seu próprio documento em `users/{uid}` e suas tarefas ficam isoladas na subcoleção `tasks`.
+
+## Segurança e Privacidade
+
+- O app usa Firebase Authentication como mecanismo principal de autenticação.
+- A exclusão de conta exige reautenticação com senha antes de remover dados.
+- Ao excluir a conta, o app remove as tarefas do usuário e o documento `users/{uid}`.
+- As regras de segurança do Firestore não estão versionadas neste repositório e devem ser configuradas diretamente no Firebase Console antes da publicação.
+
+Sugestão mínima para publicação: garantir que somente o usuário autenticado consiga ler e escrever em `users/{uid}` e `users/{uid}/tasks/{taskId}` quando `request.auth.uid == uid`.
+
+## Como Rodar
+
+1. Instale as dependências:
+
+```bash
+flutter pub get
+```
+
+2. Rode o app:
+
+```bash
+flutter run
+```
+
+## Preparação Para Play Store
+
+Antes de publicar, revise:
+
+- Nome do app e ícone final.
+- `applicationId` definitivo no Android.
+- Assinatura de release.
+- Regras de segurança do Firestore.
+- Política de privacidade, já que o app usa conta de usuário e dados pessoais.
+- Testes de cadastro, login, recuperação de senha, criação de tarefas e exclusão de conta.
+
+## Status
+
+Projeto em fase inicial, com foco em simplicidade, estabilidade e apresentação como portfólio.

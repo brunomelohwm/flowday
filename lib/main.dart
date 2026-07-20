@@ -75,7 +75,7 @@ class FlowDayApp extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
