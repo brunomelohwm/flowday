@@ -1,54 +1,54 @@
 # FlowDay
 
-FlowDay é um aplicativo Flutter simples para organização de tarefas diárias, com autenticação por email/senha e sincronização de dados no Firebase.
+FlowDay is a simple Flutter application for organizing daily tasks, featuring email/password authentication and data synchronization through Firebase.
 
-O objetivo do projeto é servir como um app funcional de portfólio, pronto para evoluir com novas funcionalidades sem mudar a base principal.
+The goal of the project is to serve as a functional portfolio app, ready to evolve with new features without changing its core foundation.
 
-## Funcionalidades
+## Features
 
-- Cadastro e login com Firebase Authentication.
-- Recuperação de senha por email.
-- Criação, edição e exclusão de tarefas.
-- Listagem de tarefas em tempo real com Cloud Firestore.
-- Visualização de tarefas por calendário.
-- Perfil com opção de sair e excluir conta.
-- Exclusão de conta remove também o documento do usuário e suas tarefas.
-- Validações básicas para evitar tarefas sem título.
-- Estados vazios amigáveis para o primeiro uso.
+* Sign up and login with Firebase Authentication.
+* Password recovery via email.
+* Create, edit, and delete tasks.
+* Real-time task listing with Cloud Firestore.
+* Calendar-based task visualization.
+* Profile with options to sign out and delete the account.
+* Account deletion also removes the user's document and tasks.
+* Basic validation to prevent tasks without a title.
+* User-friendly empty states for first-time use.
 
-## Stack
+## Tech Stack
 
-- Flutter
-- Provider
-- Firebase Authentication
-- Cloud Firestore
+* Flutter
+* Provider
+* Firebase Authentication
+* Cloud Firestore
 
-## Estrutura de Dados
+## Data Structure
 
-As tarefas são salvas no Firestore mantendo a estrutura:
+Tasks are stored in Firestore using the following structure:
 
 ```text
 users/{uid}/tasks/{taskId}
 ```
 
-Cada usuário possui seu próprio documento em `users/{uid}` e suas tarefas ficam isoladas na subcoleção `tasks`.
+Each user has their own document under `users/{uid}`, and their tasks are isolated within the `tasks` subcollection.
 
-## Segurança e Privacidade
+## Security and Privacy
 
-- O app usa Firebase Authentication como mecanismo principal de autenticação.
-- A exclusão de conta exige reautenticação com senha antes de remover dados.
-- Ao excluir a conta, o app remove as tarefas do usuário e o documento `users/{uid}`.
-- As regras de segurança do Firestore não estão versionadas neste repositório e devem ser configuradas diretamente no Firebase Console .
+* The app uses Firebase Authentication as its primary authentication mechanism.
+* Account deletion requires password reauthentication before removing data.
+* When an account is deleted, the app removes the user's tasks and the `users/{uid}` document.
+* Firestore security rules are not versioned in this repository and must be configured directly in the Firebase Console.
 
-## Como Rodar
+## How to Run
 
-1. Instale as dependências:
+1. Install the dependencies:
 
 ```bash
 flutter pub get
 ```
 
-2. Rode o app:
+2. Run the app:
 
 ```bash
 flutter run
@@ -56,4 +56,4 @@ flutter run
 
 ## Status
 
-Projeto em fase inicial, com foco em simplicidade, estabilidade e apresentação como portfólio.
+The project is currently in its early stages, with a focus on simplicity, stability, and presentation as a portfolio project.
