@@ -11,6 +11,8 @@ class Task {
   final String title;
   final String description;
   final Priority priority;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final DateTime? startDate;
   final DateTime? endDate;
 
@@ -20,6 +22,8 @@ class Task {
     required this.title,
     required this.description,
     required this.priority,
+    this.createdAt,
+    this.updatedAt,
     this.startDate,
     this.endDate,
   });
@@ -42,6 +46,8 @@ class Task {
       title: title ?? this.title,
       description: description ?? this.description,
       priority: priority ?? this.priority,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );
@@ -53,6 +59,8 @@ class Task {
       'title': title,
       'description': description,
       'priority': priority.name,
+      if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
+      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
       'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
       'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
     };
@@ -75,6 +83,8 @@ class Task {
               orElse: () => Priority.none,
             )
           : Priority.none,
+      createdAt: ts(map['createdAt'])?.toDate(),
+      updatedAt: ts(map['updatedAt'])?.toDate(),
       startDate: ts(map['startDate'])?.toDate(),
       endDate: ts(map['endDate'])?.toDate(),
     );

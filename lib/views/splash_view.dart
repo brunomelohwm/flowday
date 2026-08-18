@@ -5,6 +5,7 @@ import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
 
 class SplashView extends StatelessWidget {
   const SplashView({super.key});
@@ -19,7 +20,7 @@ class SplashView extends StatelessWidget {
             builder: (context, auth, _) {
               if (auth.isLoading) {
                 return const CircularProgressIndicator(
-                  color: Color(0xFF212121),
+                  color: AppColors.primary,
                 );
               }
 

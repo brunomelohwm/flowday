@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flowday/themes/app_colors.dart';
 
 Widget dateFiled({
   required String label,
@@ -9,16 +10,17 @@ Widget dateFiled({
   return InkWell(
     onTap: onTap,
     child: Container(
-      height: 40,
+      height: 44,
       padding: EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.outline),
       ),
       alignment: .centerLeft,
       child: Text(
         date == null ? label : DateFormat('dd/MM/yy').format(date),
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: AppColors.textPrimary),
       ),
     ),
   );

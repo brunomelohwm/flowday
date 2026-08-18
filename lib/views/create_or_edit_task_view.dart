@@ -6,6 +6,7 @@ import 'package:flowday/widgets/date_field.dart';
 import 'package:flowday/widgets/priority_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
 
 class CreateOrEditTaskView extends StatefulWidget {
   final Task? task;
@@ -51,7 +52,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           elevation: 0,
-          foregroundColor: const Color(0xFF212121),
+          foregroundColor: AppColors.textPrimary,
           backgroundColor: Colors.transparent,
         ),
         body: GestureDetector(
@@ -68,36 +69,36 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        SizedBox(
-                          width: 120,
-                          height: 30,
+                        Expanded(
+                          flex: 12,
                           child: Container(
+                            constraints: const BoxConstraints(minHeight: 44),
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF5F5F5),
-                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.surfaceVariant,
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: const Color(0xFFE0E0E0),
+                                color: AppColors.outline,
                               ),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<Priority>(
                                 isExpanded: true,
                                 isDense: true,
-                                dropdownColor: Colors.white,
+                                dropdownColor: AppColors.surface,
                                 value: selectedPriority == Priority.none
                                     ? null
                                     : selectedPriority,
                                 hint: const Text(
                                   'Prioridade',
                                   style: TextStyle(
-                                    color: Color(0xFF757575),
+                                    color: AppColors.textSecondary,
                                     fontSize: 14,
                                   ),
                                 ),
                                 iconSize: 20,
                                 style: const TextStyle(
-                                  color: Color(0xFF212121),
+                                  color: AppColors.textPrimary,
                                   fontSize: 12,
                                 ),
 
@@ -117,11 +118,10 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                           ),
                         ),
 
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
 
-                        SizedBox(
-                          width: 100,
-                          height: 30,
+                        Expanded(
+                          flex: 10,
                           child: dateFiled(
                             label: "Início",
                             date: startDate,
@@ -134,14 +134,14 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: Color(0xFF212121),
-                                        onPrimary: Colors.white,
-                                        surface: Colors.white,
-                                        onSurface: Color(0xFF212121),
+                                      colorScheme: const ColorScheme.dark(
+                                        primary: AppColors.primary,
+                                        onPrimary: AppColors.background,
+                                        surface: AppColors.surface,
+                                        onSurface: AppColors.textPrimary,
                                       ),
                                       dialogTheme: const DialogThemeData(
-                                        backgroundColor: Colors.white,
+                                        backgroundColor: AppColors.surface,
                                       ),
                                     ),
                                     child: child!,
@@ -155,11 +155,10 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                             },
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
 
-                        SizedBox(
-                          width: 100,
-                          height: 30,
+                        Expanded(
+                          flex: 10,
                           child: dateFiled(
                             label: "Fim",
                             date: endDate,
@@ -172,14 +171,14 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: Color(0xFF212121),
-                                        onPrimary: Colors.white,
-                                        surface: Colors.white,
-                                        onSurface: Color(0xFF212121),
+                                      colorScheme: const ColorScheme.dark(
+                                        primary: AppColors.primary,
+                                        onPrimary: AppColors.background,
+                                        surface: AppColors.surface,
+                                        onSurface: AppColors.textPrimary,
                                       ),
                                       dialogTheme: const DialogThemeData(
-                                        backgroundColor: Colors.white,
+                                        backgroundColor: AppColors.surface,
                                       ),
                                     ),
                                     child: child!,
@@ -199,7 +198,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: TextField(
-                      style: const TextStyle(color: Color(0xFF212121)),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       controller: titleController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(labelText: "Título..."),
@@ -208,7 +207,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: TextField(
-                      style: const TextStyle(color: Color(0xFF212121)),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       controller: descriptionController,
                       maxLines: 10,
                       decoration: const InputDecoration(
@@ -224,8 +223,8 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
         ),
         floatingActionButton: FloatingActionButton(
           disabledElevation: 0,
-          backgroundColor: const Color(0xFF212121),
-          child: const Icon(Icons.check, color: Colors.white),
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.check, color: AppColors.background),
           onPressed: () async {
             final auth = context.read<AuthController>();
             if (auth.currentUser == null) return;

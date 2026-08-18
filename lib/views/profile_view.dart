@@ -3,6 +3,8 @@ import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/widgets/glass_container.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -46,7 +48,7 @@ class _ProfileViewState extends State<ProfileView> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.surface,
               title: const Text('Excluir conta'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -148,7 +150,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Perfil', style: TextStyle(color: Color(0xFF212121))),
+        title: const Text('Perfil'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -161,21 +163,19 @@ class _ProfileViewState extends State<ProfileView> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+              GlassContainer(
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
                         'Email',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF757575),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -183,13 +183,12 @@ class _ProfileViewState extends State<ProfileView> {
                         user.email ?? '',
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Color(0xFF212121),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
               const SizedBox(height: 16),
             ],
             TextButton.icon(
@@ -204,11 +203,17 @@ class _ProfileViewState extends State<ProfileView> {
             SizedBox(
               width: double.infinity,
               height: 48,
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: auth.isLoading ? null : _handleLogout,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
                 child: auth.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: AppColors.primary)
                     : const Text('Sair'),
               ),
             ),

@@ -6,6 +6,8 @@ import 'package:flowday/views/main_shell_view.dart';
 import 'package:flowday/views/register_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/widgets/flowday_logo.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -67,7 +69,7 @@ class _LoginViewState extends State<LoginView> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           title: const Text('Recuperar senha'),
           content: TextField(
             controller: TextEditingController(text: email),
@@ -139,19 +141,12 @@ class _LoginViewState extends State<LoginView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  const Text(
-                    'FlowDay',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Color(0xFF212121),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  const FlowDayLogo(),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: const InputDecoration(labelText: 'Email'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -167,7 +162,7 @@ class _LoginViewState extends State<LoginView> {
                   TextFormField(
                     controller: passwordController,
                     obscureText: _obscurePassword,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'Senha',
                       suffixIcon: IconButton(
@@ -175,7 +170,7 @@ class _LoginViewState extends State<LoginView> {
                           _obscurePassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: const Color(0xFF757575),
+                          color: AppColors.textSecondary,
                         ),
                         onPressed: () {
                           setState(() {
@@ -197,7 +192,7 @@ class _LoginViewState extends State<LoginView> {
                       onPressed: auth.isLoading ? null : _handlePasswordReset,
                       child: const Text(
                         'Esqueci minha senha',
-                        style: TextStyle(color: Color(0xFF212121)),
+                        style: TextStyle(color: AppColors.primary),
                       ),
                     ),
                   ),
@@ -226,7 +221,7 @@ class _LoginViewState extends State<LoginView> {
                           },
                     child: const Text(
                       'Não tem uma conta? Criar conta',
-                      style: TextStyle(color: Color(0xFF212121)),
+                      style: TextStyle(color: AppColors.primary),
                     ),
                   ),
                 ],

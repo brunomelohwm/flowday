@@ -5,6 +5,8 @@ import 'package:flowday/models/task.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/widgets/glass_container.dart';
 import 'package:flowday/widgets/priority_widget.dart';
+import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/themes/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 class TaskCardWidget extends StatefulWidget {
@@ -22,16 +24,14 @@ class TaskCardWidget extends StatefulWidget {
 }
 
 class _TaskCardWidgetState extends State<TaskCardWidget> {
-  bool expanded = false;
-
   Future<void> _confirmDelete() async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         title: const Text(
           "Excluir tarefa?",
-          style: TextStyle(color: Color(0xFF212121)),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         content: const Text("Essa ação não pode ser desfeita."),
         actions: [
@@ -39,7 +39,7 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text(
               "Cancelar",
-              style: TextStyle(color: Color(0xFF757575)),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           ElevatedButton(
@@ -87,52 +87,56 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
       },
       onLongPress: _confirmDelete,
       child: GlassContainer(
-        child: SizedBox(
-          height: 150,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              widget.task.priority.widget,
-              Text(
-                widget.task.title,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                  color: Color(0xFF212121),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            widget.task.priority.widget,
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              widget.task.title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                const Icon(
+                  Icons.timer_outlined,
+                  color: AppColors.textSecondary,
+                  size: 18,
                 ),
-              ),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.timer_outlined,
-                    color: Color(0xFF757575),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 4),
-                  buildDateInfo(widget.task),
-                ],
-              ),
-              if (widget.task.endDate != null)
-                Text(
+                const SizedBox(width: 4),
+                buildDateInfo(widget.task),
+              ],
+            ),
+            if (widget.task.endDate != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
                   "Data final: ${formatMonthDay(widget.task.endDate!)}",
                   style: const TextStyle(
-                    color: Color(0xFF757575),
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
-              Text(
-                widget.task.description.isEmpty
-                    ? 'Sem descrição'
-                    : widget.task.description,
-                style: const TextStyle(color: Color(0xFF757575), fontSize: 14),
-                overflow: expanded
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              widget.task.description.isEmpty
+                  ? 'Sem descrição'
+                  : widget.task.description,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
