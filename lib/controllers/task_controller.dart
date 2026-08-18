@@ -32,7 +32,6 @@ class TaskController extends ChangeNotifier {
         .collection('users')
         .doc(_currentUserId)
         .collection('tasks')
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
           _allTasks
@@ -41,7 +40,12 @@ class TaskController extends ChangeNotifier {
               snapshot.docs.map(
                 (doc) => Task.fromMap(doc.data(), id: doc.id),
               ),
-            );
+            )
+            ..sort((first, second) {
+              final firstDate = first.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final secondDate = second.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              return secondDate.compareTo(firstDate);
+            });
           notifyListeners();
         });
   }
@@ -56,20 +60,25 @@ class TaskController extends ChangeNotifier {
         .doc(_currentUserId)
         .collection('tasks')
         .doc(newTask.id)
-        .set(newTask.toMap());
+        .set({
+          ...newTask.toMap(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   Future<void> updateTask(Task task) async {
     if (_currentUserId == null || task.userId != _currentUserId) return;
-
-    final updatedTask = task.copyWith(updatedAt: DateTime.now());
 
     await FirebaseFirestore.instance
         .collection('users')
         .doc(_currentUserId)
         .collection('tasks')
         .doc(task.id)
-        .update(updatedTask.toMap());
+        .update({
+          ...task.toMap(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   Future<void> removeTask(String taskId) async {

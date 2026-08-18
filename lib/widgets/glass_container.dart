@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flowday/themes/app_colors.dart';
 
 class GlassContainer extends StatelessWidget {
   final Widget child;
@@ -11,7 +12,7 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(16),
     this.margin = const EdgeInsets.all(0),
-    this.borderRadius = const BorderRadius.all(Radius.circular(16)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
 
   @override
@@ -20,17 +21,17 @@ class GlassContainer extends StatelessWidget {
       padding: padding,
       margin: margin,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: borderRadius,
         border: Border.all(
-          color: const Color(0xFFE0E0E0),
+          color: AppColors.outline,
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),

@@ -6,6 +6,8 @@ import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/widgets/flowday_logo.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -89,24 +91,20 @@ class _RegisterViewState extends State<RegisterView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  const Text(
-                    'FlowDay',
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Color(0xFF212121),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  const FlowDayLogo(),
                   const SizedBox(height: 8),
                   const Text(
                     'Criar nova conta',
-                    style: TextStyle(fontSize: 16, color: Color(0xFF757575)),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
                     controller: nameController,
                     keyboardType: TextInputType.name,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: const InputDecoration(labelText: 'Nome'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -120,7 +118,7 @@ class _RegisterViewState extends State<RegisterView> {
                   TextFormField(
                     controller: lastNameController,
                     keyboardType: TextInputType.name,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: const InputDecoration(labelText: 'Sobrenome'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -134,7 +132,7 @@ class _RegisterViewState extends State<RegisterView> {
                   TextFormField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: const InputDecoration(labelText: 'Email'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -150,7 +148,7 @@ class _RegisterViewState extends State<RegisterView> {
                   TextFormField(
                     controller: passwordController,
                     obscureText: _obscurePassword,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'Senha',
                       suffixIcon: IconButton(
@@ -158,7 +156,7 @@ class _RegisterViewState extends State<RegisterView> {
                           _obscurePassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: const Color(0xFF757575),
+                          color: AppColors.textSecondary,
                         ),
                         onPressed: () {
                           setState(() {
@@ -181,7 +179,7 @@ class _RegisterViewState extends State<RegisterView> {
                   TextFormField(
                     controller: confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
-                    style: const TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       labelText: 'Confirmar Senha',
                       suffixIcon: IconButton(
@@ -189,7 +187,7 @@ class _RegisterViewState extends State<RegisterView> {
                           _obscureConfirmPassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: const Color(0xFF757575),
+                          color: AppColors.textSecondary,
                         ),
                         onPressed: () {
                           setState(() {
@@ -233,7 +231,7 @@ class _RegisterViewState extends State<RegisterView> {
                           },
                     child: const Text(
                       'Já tem uma conta? Entrar',
-                      style: TextStyle(color: Color(0xFF212121)),
+                      style: TextStyle(color: AppColors.primary),
                     ),
                   ),
                 ],

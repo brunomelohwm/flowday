@@ -1,7 +1,6 @@
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/views/calendar_view.dart';
-import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/views/home_tasks_view.dart';
 import 'package:flowday/views/profile_view.dart';
 import 'package:flowday/widgets/flow_bottom_bar.dart';
@@ -39,20 +38,6 @@ class _MainShellViewState extends State<MainShellView> {
             setState(() => _currentIndex = index);
           },
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    CreateOrEditTaskView(controller: widget.taskController),
-              ),
-            );
-          },
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }

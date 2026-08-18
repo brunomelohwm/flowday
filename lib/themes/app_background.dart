@@ -9,7 +9,7 @@ class AppBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.background,
       ),
       child: child,
     );

@@ -4,6 +4,8 @@ import 'package:flowday/widgets/task_card_widget.dart';
 import 'package:flowday/models/task.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flowday/themes/app_colors.dart';
+import 'package:flowday/themes/app_spacing.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -90,11 +92,15 @@ class _CalendarViewState extends State<CalendarView> {
     final taskController = Provider.of<TaskController>(context);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
+        0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
           Row(
             children: [
               GestureDetector(
@@ -106,21 +112,21 @@ class _CalendarViewState extends State<CalendarView> {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF212121),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 8),
                     const Icon(
                       Icons.calendar_today,
                       size: 20,
-                      color: Color(0xFF757575),
+                      color: AppColors.textSecondary,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
           SizedBox(
             height: 80,
             child: ListView.builder(
@@ -147,12 +153,12 @@ class _CalendarViewState extends State<CalendarView> {
                   },
                   child: Container(
                     width: 60,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: const EdgeInsets.only(right: AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF212121)
+                          ? AppColors.primary
                           : (isToday
-                                ? const Color(0xFFE0E0E0)
+                                ? AppColors.surfaceVariant
                                 : Colors.transparent),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -169,7 +175,7 @@ class _CalendarViewState extends State<CalendarView> {
                             fontWeight: FontWeight.w500,
                             color: isSelected
                                 ? Colors.white
-                                : const Color(0xFF757575),
+                                : AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -180,7 +186,7 @@ class _CalendarViewState extends State<CalendarView> {
                             fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? Colors.white
-                                : const Color(0xFF212121),
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -190,7 +196,7 @@ class _CalendarViewState extends State<CalendarView> {
               },
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
 
           Expanded(
             child: AnimatedBuilder(
@@ -216,14 +222,14 @@ class _CalendarViewState extends State<CalendarView> {
                           const Icon(
                             Icons.event_available_outlined,
                             size: 44,
-                            color: Color(0xFF757575),
+                            color: AppColors.textSecondary,
                           ),
                           const SizedBox(height: 12),
                           Text(
                             'Nenhuma tarefa para ${DateFormat('d/MM/yyyy', 'pt_BR').format(_selectedDate)}.',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              color: Color(0xFF212121),
+                              color: AppColors.textPrimary,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -233,7 +239,7 @@ class _CalendarViewState extends State<CalendarView> {
                             'Use o botão + para planejar esse dia.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF757575),
+                              color: AppColors.textSecondary,
                               fontSize: 14,
                             ),
                           ),
@@ -247,7 +253,7 @@ class _CalendarViewState extends State<CalendarView> {
                   itemCount: tasksForDate.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 15),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: TaskCardWidget(
                         controller: taskController,
                         task: tasksForDate[index],

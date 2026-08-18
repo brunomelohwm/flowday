@@ -5,11 +5,11 @@ extension PriorityWidget on Priority {
   Widget get widget {
     switch (this) {
       case Priority.none:
-        return _badge(Colors.grey, 'Nenhuma');
+        return _badge(Colors.blueGrey.shade300, 'Nenhuma');
       case Priority.low:
         return _badge(Colors.green, 'Baixa');
       case Priority.medium:
-        return _badge(Colors.yellow, 'Média');
+        return _badge(const Color(0xFFFFD166), 'Média');
       case Priority.high:
         return _badge(Colors.red, 'Alta');
     }
