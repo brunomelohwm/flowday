@@ -55,7 +55,8 @@ class _ProfileViewState extends State<ProfileView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Essa ação remove sua conta e todas as suas tarefas. Para confirmar, informe sua senha atual.',
+                    'Essa ação remove sua conta e todas as suas tarefas. '
+                    'Para confirmar, informe sua senha atual.',
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -99,14 +100,17 @@ class _ProfileViewState extends State<ProfileView> {
     if (confirmed != true) return;
 
     final password = _passwordController.text.trim();
+
     if (password.isEmpty) {
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Informe sua senha para excluir a conta.'),
           backgroundColor: Colors.red,
         ),
       );
+
       return;
     }
 
@@ -114,6 +118,7 @@ class _ProfileViewState extends State<ProfileView> {
 
     final auth = context.read<AuthController>();
     final taskController = context.read<TaskController>();
+
     final deleted = await auth.deleteAccount(password: password);
 
     if (!mounted) return;
@@ -127,10 +132,12 @@ class _ProfileViewState extends State<ProfileView> {
           backgroundColor: Colors.red,
         ),
       );
+
       return;
     }
 
     taskController.setUserId(null);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Conta excluída com sucesso.')),
     );
@@ -145,80 +152,129 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
-    final user = auth.currentUser;
+    final user = auth.user;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Perfil'),
-      ),
+      appBar: AppBar(title: const Text('Perfil')),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (user != null) ...[
-              const Text(
-                'Informações da conta',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              GlassContainer(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Email',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+        child: user == null
+            ? const SizedBox.shrink()
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Identidade
+                  const SizedBox(height: 12),
+
+                  GlassContainer(
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.person_outline,
+                              size: 40,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '${user.name} ${user.lastName}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            user.email,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Zona perigosa
+                  const Text(
+                    'Gerenciamento da conta',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  const Text(
+                    'A exclusão da conta remove permanentemente '
+                    'seus dados e tarefas.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextButton.icon(
+                    onPressed: auth.isLoading ? null : _handleDeleteAccount,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      foregroundColor: Colors.red,
+                    ),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Excluir conta'),
+                  ),
+
+                  const Spacer(),
+
+                  // Logout
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: auth.isLoading ? null : _handleLogout,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary,
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email ?? '',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                      child: auth.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : const Text('Sair'),
+                    ),
                   ),
-                ),
-              const SizedBox(height: 16),
-            ],
-            TextButton.icon(
-              onPressed: auth.isLoading ? null : _handleDeleteAccount,
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              label: const Text(
-                'Excluir conta',
-                style: TextStyle(color: Colors.red),
+                ],
               ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                onPressed: auth.isLoading ? null : _handleLogout,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textPrimary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: auth.isLoading
-                    ? const CircularProgressIndicator(color: AppColors.primary)
-                    : const Text('Sair'),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
