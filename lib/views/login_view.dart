@@ -203,7 +203,14 @@ class _LoginViewState extends State<LoginView> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _handleLogin,
                       child: auth.isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
                           : const Text('Entrar'),
                     ),
                   ),
