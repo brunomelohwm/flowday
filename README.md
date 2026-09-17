@@ -92,7 +92,6 @@ flutter run
 ## 📌 Status
 
 Functional portfolio project with active development.
-Planned next steps: [add your next feature here].
 
 ---
 
