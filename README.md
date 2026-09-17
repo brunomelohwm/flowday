@@ -1,59 +1,102 @@
 # FlowDay
 
-FlowDay is a simple Flutter application for organizing daily tasks, featuring email/password authentication and data synchronization through Firebase.
+A Flutter app for organizing daily tasks, with email/password authentication and real-time sync via Firebase.
 
-The goal of the project is to serve as a functional portfolio app, ready to evolve with new features without changing its core foundation.
+Built as a functional portfolio project — designed to evolve with new features without changing its core foundation.
 
-## Features
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 
-* Sign up and login with Firebase Authentication.
-* Password recovery via email.
-* Create, edit, and delete tasks.
-* Real-time task listing with Cloud Firestore.
-* Calendar-based task visualization.
-* Profile with options to sign out and delete the account.
-* Account deletion also removes the user's document and tasks.
-* Basic validation to prevent tasks without a title.
-* User-friendly empty states for first-time use.
+---
 
-## Tech Stack
+## 📱 Screenshots
 
-* Flutter
-* Provider
-* Firebase Authentication
-* Cloud Firestore
+| Login | Tasks | New Task | Profile |
+|-------|-------|----------|---------|
+| ![Login](assets/screenshots/login.png) | ![Tasks](assets/screenshots/tasks.png) | ![New Task](assets/screenshots/new_task.png) | ![Profile](assets/screenshots/profile.png) |
 
-## Data Structure
+> Replace the paths above with your actual screenshots.
 
-Tasks are stored in Firestore using the following structure:
+---
 
-```text
+## ✨ Features
+
+- Sign up and login with Firebase Authentication
+- Password recovery via email
+- Create, edit, and delete tasks
+- Real-time task listing with Cloud Firestore
+- Calendar-based task visualization
+- Profile with sign out and account deletion
+- Account deletion removes user document and all tasks (with password reauthentication)
+- Basic validation to prevent tasks without a title
+- User-friendly empty states for first-time use
+
+---
+
+## 🛠 Tech Stack
+
+- **Flutter** — UI and app logic
+- **Provider** — State management
+- **Firebase Authentication** — Auth
+- **Cloud Firestore** — Real-time database
+
+**Why Provider (and not BLoC/Cubit)?**
+Provider was chosen for simplicity given this app's scope. For larger apps with more complex state and business logic, I use BLoC/Cubit with Clean Architecture — as in my professional experience.
+
+---
+
+## 🗂 Data Structure
+
+Tasks are stored in Firestore under:
+
 users/{uid}/tasks/{taskId}
-```
 
-Each user has their own document under `users/{uid}`, and their tasks are isolated within the `tasks` subcollection.
+Each user has their own document at `users/{uid}`, and tasks are isolated in the `tasks` subcollection.
 
-## Security and Privacy
+---
 
-* The app uses Firebase Authentication as its primary authentication mechanism.
-* Account deletion requires password reauthentication before removing data.
-* When an account is deleted, the app removes the user's tasks and the `users/{uid}` document.
-* Firestore security rules are not versioned in this repository and must be configured directly in the Firebase Console.
+## 🔒 Security and Privacy
 
-## How to Run
+- Firebase Authentication as the primary auth mechanism
+- Account deletion requires password reauthentication before removing data
+- When an account is deleted, the user's tasks and the `users/{uid}` document are removed
+- Firestore security rules are configured directly in the Firebase Console (not versioned in this repo)
 
-1. Install the dependencies:
+---
 
-```bash
+## 🚀 How to Run
+
+### 1. Clone the repository
+
+git clone https://github.com/brunomelohwm/flowday.git
+cd flowday
+
+### 2. Install dependencies
+
 flutter pub get
-```
 
-2. Run the app:
+### 3. Configure Firebase
 
-```bash
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/)
+2. Enable **Authentication** (Email/Password) and **Cloud Firestore**
+3. Run `flutterfire configure` and select your project
+4. This generates `firebase_options.dart` and adds the platform config files
+
+### 4. Run the app
+
 flutter run
-```
 
-## Status
+---
 
-The project is currently in its early stages, with a focus on simplicity, stability, and presentation as a portfolio project.
+## 📌 Status
+
+Functional portfolio project with active development.
+Planned next steps: [add your next feature here].
+
+---
+
+## 📫 Contact
+
+- LinkedIn: [bruno-melo-76a853250](https://www.linkedin.com/in/bruno-melo-76a853250/)
+- Email: brunomelohwm@gmail.com
