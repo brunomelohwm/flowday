@@ -79,6 +79,14 @@ test('an owner can read and mutate their profile and task collection', async () 
   await assertSucceeds(deleteDoc(profile));
 });
 
+test('a user can create their profile, but another user cannot create it', async () => {
+  const ownerDb = testEnv.authenticatedContext('charlie').firestore();
+  const otherUserDb = testEnv.authenticatedContext('bob').firestore();
+
+  await assertSucceeds(setDoc(doc(ownerDb, 'users/charlie'), { name: 'Charlie' }));
+  await assertFails(setDoc(doc(otherUserDb, 'users/dana'), { name: 'Dana' }));
+});
+
 test('a different user cannot access or mutate another user profile or tasks', async () => {
   const db = testEnv.authenticatedContext('bob').firestore();
   const profile = doc(db, 'users/alice');
