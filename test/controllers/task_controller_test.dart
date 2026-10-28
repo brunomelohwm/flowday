@@ -55,7 +55,6 @@ void main() {
       priority: Priority.high,
       status: TaskStatus.done,
     );
-    when(() => repository.updateTask(updatedTask)).thenAnswer((_) async {});
 
     final controller = TaskController(repository: repository);
     controller.setUserId('user-1');
@@ -74,11 +73,39 @@ void main() {
 
     await controller.updateTask(updatedTask);
     expect(controller.tasks, [streamedTask]);
-    verify(() => repository.updateTask(updatedTask)).called(1);
+    final updated =
+        verify(() => repository.updateTask(captureAny())).captured.single
+            as Task;
+    expect(updated.status, TaskStatus.done);
 
     await controller.removeTask('task-1');
     verify(() => repository.deleteTask('user-1', 'task-1')).called(1);
 
     controller.dispose();
   });
+
+  test(
+    'setTaskStatus persists a completed status for the current user',
+    () async {
+      const task = Task(
+        id: 'task-2',
+        userId: 'user-1',
+        title: 'Prepare interview',
+        description: '',
+        priority: Priority.medium,
+      );
+
+      final controller = TaskController(repository: repository);
+      controller.setUserId('user-1');
+      await controller.setTaskStatus(task, TaskStatus.done);
+
+      final persisted =
+          verify(() => repository.updateTask(captureAny())).captured.single
+              as Task;
+      expect(persisted.id, 'task-2');
+      expect(persisted.userId, 'user-1');
+      expect(persisted.status, TaskStatus.done);
+      controller.dispose();
+    },
+  );
 }

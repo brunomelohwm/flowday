@@ -81,6 +81,8 @@ class TaskController extends ChangeNotifier {
     await _repository.updateTask(task);
   }
 
+  Future<void> setTaskStatus(Task task, TaskStatus status) =>
+      updateTask(task.copyWith(status: status));
   Future<void> removeTask(String taskId) async {
     final userId = _currentUserId;
     if (userId == null) return;

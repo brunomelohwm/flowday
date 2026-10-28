@@ -18,9 +18,15 @@ class CreateOrEditTaskView extends StatefulWidget {
 }
 
 class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
+  String _statusLabel(TaskStatus status) => switch (status) {
+    TaskStatus.todo => 'A fazer',
+    TaskStatus.inProgress => 'Em andamento',
+    TaskStatus.done => 'Concluída',
+  };
   late TextEditingController titleController;
   late TextEditingController descriptionController;
   Priority selectedPriority = Priority.none;
+  TaskStatus selectedStatus = TaskStatus.todo;
   DateTime? startDate;
   DateTime? endDate;
 
@@ -32,6 +38,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
       text: widget.task?.description ?? '',
     );
     selectedPriority = widget.task?.priority ?? Priority.none;
+    selectedStatus = widget.task?.status ?? TaskStatus.todo;
 
     startDate = widget.task?.startDate;
     endDate = widget.task?.endDate;
@@ -194,6 +201,24 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                     ),
                   ),
                   Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: DropdownButtonFormField<TaskStatus>(
+                      initialValue: selectedStatus,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: TaskStatus.values.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(_statusLabel(status)),
+                        );
+                      }).toList(),
+                      onChanged: (status) {
+                        if (status != null) {
+                          setState(() => selectedStatus = status);
+                        }
+                      },
+                    ),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.all(16),
                     child: TextField(
                       style: const TextStyle(color: AppColors.textPrimary),
@@ -246,6 +271,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
               title: title,
               description: description,
               priority: selectedPriority,
+              status: selectedStatus,
               startDate: startDate,
               endDate: endDate,
             );

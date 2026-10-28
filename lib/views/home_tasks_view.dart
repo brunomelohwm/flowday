@@ -1,5 +1,6 @@
 import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/models/task.dart';
+import 'package:flowday/Utils/build_date_info.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
 import 'package:flowday/views/all_tasks_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
@@ -16,11 +17,8 @@ class HomeTasksView extends StatelessWidget {
   const HomeTasksView({super.key, required this.controller});
 
   String _contextualMessage(List<Task> tasks) {
-    final today = DateTime.now();
-    final tasksForToday = tasks.where((task) {
-      return DateUtils.isSameDay(task.startDate, today) ||
-          DateUtils.isSameDay(task.endDate, today);
-    }).length;
+    final today = DateUtils.dateOnly(DateTime.now());
+    final tasksForToday = groupTasksByCalendarDay(tasks)[today]?.length ?? 0;
 
     if (tasksForToday > 0) {
       final label = tasksForToday == 1 ? 'tarefa' : 'tarefas';
