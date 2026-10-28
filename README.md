@@ -109,12 +109,13 @@ flutter analyze
 flutter test
 flutter test test/widgets/task_load_feedback_test.dart
 flutter test test/views/task_card_widget_test.dart
+flutter test test/views/profile_view_test.dart
 npm ci --prefix firebase-tests
 npm --prefix firebase-tests run test:rules
 flutter build apk --debug
 ```
 
-The workflow runs on pushes to `main` and `codex/flowday-portfolio`, and on pull requests. The Android build is a debug APK check; it does not produce a signed release.
+The workflow runs on pushes to `main` and `codex/flowday-portfolio`, and on pull requests. It creates temporary demo Firebase client files for analysis and Android packaging; they contain no project credentials and are not committed. The Android build is a debug APK check; it does not produce a signed release.
 
 ---
 

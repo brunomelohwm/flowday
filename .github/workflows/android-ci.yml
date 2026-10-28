@@ -17,6 +17,44 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Create CI-only Firebase config
+        run: |
+          cat > lib/firebase_options.dart <<'EOF'
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+
+          class DefaultFirebaseOptions {
+            static const FirebaseOptions currentPlatform = android;
+
+            static const FirebaseOptions android = FirebaseOptions(
+              apiKey: 'demo-api-key',
+              appId: '1:000000000000:android:0000000000000000',
+              messagingSenderId: '000000000000',
+              projectId: 'demo-flowday-ci',
+            );
+          }
+          EOF
+          mkdir -p android/app
+          cat > android/app/google-services.json <<'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "demo-flowday-ci",
+              "storage_bucket": "demo-flowday-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {"package_name": "com.example.flowday"}
+                },
+                "api_key": [{"current_key": "demo-api-key"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+
       - name: Set up Java for Firestore Emulator
         uses: actions/setup-java@v6
         with:
@@ -56,6 +94,7 @@ jobs:
         run: |
           flutter test test/widgets/task_load_feedback_test.dart
           flutter test test/views/task_card_widget_test.dart
+          flutter test test/views/profile_view_test.dart
 
       - name: Test Firestore ownership rules
         run: npm --prefix firebase-tests run test:rules
