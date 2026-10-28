@@ -83,7 +83,7 @@ class AuthController extends ChangeNotifier {
         _user = null;
       });
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
     _isLoading = true;
     _errorMessage = null;
     _notifyIfActive();
@@ -91,8 +91,10 @@ class AuthController extends ChangeNotifier {
       await _repository.signOut();
       _currentUserId = null;
       _user = null;
+      return true;
     } catch (error) {
       _errorMessage = error.toString();
+      return false;
     } finally {
       _isLoading = false;
       _notifyIfActive();

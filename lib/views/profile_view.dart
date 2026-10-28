@@ -27,10 +27,21 @@ class _ProfileViewState extends State<ProfileView> {
     final auth = context.read<AuthController>();
     final taskController = context.read<TaskController>();
 
-    taskController.setUserId(null);
-    await auth.logout();
+    final loggedOut = await auth.logout();
 
     if (!mounted) return;
+
+    if (!loggedOut) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Não foi possível sair.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    taskController.setUserId(null);
 
     Navigator.pushAndRemoveUntil(
       context,

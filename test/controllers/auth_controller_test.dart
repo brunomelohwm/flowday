@@ -140,4 +140,37 @@ void main() {
     expect(controller.errorMessage, isNull);
     controller.dispose();
   });
+
+  test('logout reports failure and keeps the authenticated session', () async {
+    when(() => repository.currentUserId).thenReturn('user-logout');
+    when(
+      () => repository.loadProfile('user-logout'),
+    ).thenAnswer((_) async => app_user.User(id: 'user-logout', email: 'a@b.c'));
+    when(() => repository.signOut()).thenThrow(StateError('offline'));
+
+    final controller = AuthController(repository: repository);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(await controller.logout(), isFalse);
+    expect(controller.currentUserId, 'user-logout');
+    expect(controller.errorMessage, contains('offline'));
+    expect(controller.isLoading, isFalse);
+    controller.dispose();
+  });
+
+  test('successful logout clears the authenticated session', () async {
+    when(() => repository.currentUserId).thenReturn('user-logout');
+    when(
+      () => repository.loadProfile('user-logout'),
+    ).thenAnswer((_) async => app_user.User(id: 'user-logout', email: 'a@b.c'));
+    when(() => repository.signOut()).thenAnswer((_) async {});
+
+    final controller = AuthController(repository: repository);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(await controller.logout(), isTrue);
+    expect(controller.currentUserId, isNull);
+    expect(controller.isAuthenticated, isFalse);
+    controller.dispose();
+  });
 }
