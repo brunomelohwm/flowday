@@ -67,6 +67,15 @@ class AuthController extends ChangeNotifier {
   Future<bool> sendPasswordResetEmail(String email) =>
       _runAuthAction(() => _repository.sendPasswordResetEmail(email));
 
+  Future<void> retryLoadProfile() async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+    _isLoading = true;
+    _errorMessage = null;
+    _notifyIfActive();
+    await _loadProfile(userId);
+  }
+
   Future<bool> deleteAccount({required String password}) =>
       _runAuthAction(() async {
         await _repository.deleteAccount(password: password);

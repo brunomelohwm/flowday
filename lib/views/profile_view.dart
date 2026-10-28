@@ -160,7 +160,27 @@ class _ProfileViewState extends State<ProfileView> {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: user == null
-            ? const SizedBox.shrink()
+            ? Center(
+                child: auth.isLoading
+                    ? const CircularProgressIndicator(color: AppColors.primary)
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            auth.errorMessage ?? 'Perfil indisponível.',
+                            textAlign: TextAlign.center,
+                          ),
+                          if (auth.errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: auth.retryLoadProfile,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Tentar novamente'),
+                            ),
+                          ],
+                        ],
+                      ),
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

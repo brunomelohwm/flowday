@@ -2,6 +2,7 @@ import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flowday/Utils/build_date_info.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
+import 'package:flowday/widgets/task_load_feedback.dart';
 import 'package:flowday/views/all_tasks_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/themes/app_colors.dart';
@@ -113,6 +114,20 @@ class HomeTasksView extends StatelessWidget {
               animation: controller,
               builder: (_, _) {
                 final tasks = controller.tasks;
+                if (tasks.isEmpty && controller.isLoading) {
+                  return TaskLoadFeedback(
+                    isLoading: true,
+                    errorMessage: null,
+                    onRetry: () {},
+                  );
+                }
+                if (controller.errorMessage != null) {
+                  return TaskLoadFeedback(
+                    isLoading: false,
+                    errorMessage: controller.errorMessage,
+                    onRetry: controller.retryLoad,
+                  );
+                }
                 if (tasks.isEmpty) {
                   return const Center(
                     child: Padding(

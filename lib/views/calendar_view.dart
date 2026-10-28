@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
+import 'package:flowday/widgets/task_load_feedback.dart';
 import 'package:flowday/Utils/build_date_info.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -184,6 +185,20 @@ class _CalendarViewState extends State<CalendarView> {
               animation: taskController,
               builder: (context, _) {
                 final tasks = taskController.tasks;
+                if (tasks.isEmpty && taskController.isLoading) {
+                  return TaskLoadFeedback(
+                    isLoading: true,
+                    errorMessage: null,
+                    onRetry: taskController.retryLoad,
+                  );
+                }
+                if (taskController.errorMessage != null) {
+                  return TaskLoadFeedback(
+                    isLoading: false,
+                    errorMessage: taskController.errorMessage,
+                    onRetry: taskController.retryLoad,
+                  );
+                }
                 final groupedTasks = groupTasksByCalendarDay(tasks);
 
                 final selectedDateKey = DateTime(

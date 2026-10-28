@@ -85,4 +85,59 @@ void main() {
     expect(controller.user?.email, 'bia@example.com');
     controller.dispose();
   });
+  test(
+    'login failure clears loading and exposes an error that can be cleared',
+    () async {
+      final loginResult = Completer<void>();
+      when(
+        () => repository.signIn(
+          email: 'ana@example.com',
+          password: 'wrong-password',
+        ),
+      ).thenAnswer((_) => loginResult.future);
+
+      final controller = AuthController(repository: repository);
+      final login = controller.login(
+        email: 'ana@example.com',
+        password: 'wrong-password',
+      );
+
+      expect(controller.isLoading, isTrue);
+      loginResult.completeError(StateError('invalid credentials'));
+
+      expect(await login, isFalse);
+      expect(controller.isLoading, isFalse);
+      expect(controller.errorMessage, contains('invalid credentials'));
+
+      controller.clearError();
+      expect(controller.errorMessage, isNull);
+      controller.dispose();
+    },
+  );
+
+  test('profile load error can be retried successfully', () async {
+    final profile = app_user.User(
+      id: 'user-3',
+      email: 'caio@example.com',
+      name: 'Caio',
+    );
+    when(() => repository.currentUserId).thenReturn('user-3');
+    var attempts = 0;
+    when(() => repository.loadProfile('user-3')).thenAnswer((_) async {
+      attempts++;
+      if (attempts == 1) throw StateError('network unavailable');
+      return profile;
+    });
+
+    final controller = AuthController(repository: repository);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.user, isNull);
+    expect(controller.errorMessage, contains('network unavailable'));
+    expect(controller.isLoading, isFalse);
+    await controller.retryLoadProfile();
+    expect(controller.user?.email, 'caio@example.com');
+    expect(controller.errorMessage, isNull);
+    controller.dispose();
+  });
 }

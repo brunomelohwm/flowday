@@ -2,6 +2,7 @@ import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_colors.dart';
 import 'package:flowday/themes/app_spacing.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
+import 'package:flowday/widgets/task_load_feedback.dart';
 import 'package:flutter/material.dart';
 
 class AllTasksView extends StatelessWidget {
@@ -17,6 +18,20 @@ class AllTasksView extends StatelessWidget {
         animation: controller,
         builder: (_, _) {
           final tasks = controller.tasks;
+          if (tasks.isEmpty && controller.isLoading) {
+            return TaskLoadFeedback(
+              isLoading: true,
+              errorMessage: null,
+              onRetry: controller.retryLoad,
+            );
+          }
+          if (controller.errorMessage != null) {
+            return TaskLoadFeedback(
+              isLoading: false,
+              errorMessage: controller.errorMessage,
+              onRetry: controller.retryLoad,
+            );
+          }
           if (tasks.isEmpty) {
             return const Center(
               child: Padding(
@@ -39,10 +54,8 @@ class AllTasksView extends StatelessWidget {
             ),
             itemCount: tasks.length,
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (_, index) => TaskCardWidget(
-              controller: controller,
-              task: tasks[index],
-            ),
+            itemBuilder: (_, index) =>
+                TaskCardWidget(controller: controller, task: tasks[index]),
           );
         },
       ),

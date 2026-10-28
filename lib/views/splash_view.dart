@@ -24,6 +24,25 @@ class SplashView extends StatelessWidget {
                 );
               }
 
+              if (auth.errorMessage != null && auth.currentUserId != null) {
+                return Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        auth.errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                      TextButton(
+                        onPressed: auth.retryLoadProfile,
+                        child: const Text('Tentar carregar novamente'),
+                      ),
+                    ],
+                  ),
+                );
+              }
               final taskController = context.read<TaskController>();
 
               WidgetsBinding.instance.addPostFrameCallback((_) async {

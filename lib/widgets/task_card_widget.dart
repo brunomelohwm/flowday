@@ -129,15 +129,23 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
                   tooltip: widget.task.status == TaskStatus.done
                       ? 'Reabrir tarefa'
                       : 'Concluir tarefa',
-                  onPressed: _toggleCompletion,
-                  icon: Icon(
-                    widget.task.status == TaskStatus.done
-                        ? Icons.check_circle
-                        : Icons.circle_outlined,
-                    color: widget.task.status == TaskStatus.done
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                  ),
+                  onPressed: widget.controller.isLoading
+                      ? null
+                      : _toggleCompletion,
+                  icon: widget.controller.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          widget.task.status == TaskStatus.done
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: widget.task.status == TaskStatus.done
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
+                        ),
                 ),
               ],
             ),

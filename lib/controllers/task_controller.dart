@@ -32,6 +32,7 @@ class TaskController extends ChangeNotifier {
 
   void setUserId(String? userId) {
     if (_currentUserId == userId && _tasksSubscription != null) return;
+
     _currentUserId = userId;
     _allTasks.clear();
     _errorMessage = null;
@@ -45,48 +46,87 @@ class TaskController extends ChangeNotifier {
     }
 
     _isLoading = true;
-    final subscribedUserId = userId;
-    _tasksSubscription = _repository
-        .watchTasks(subscribedUserId)
-        .listen(
-          (tasks) {
-            if (_currentUserId != subscribedUserId) return;
-            _allTasks
-              ..clear()
-              ..addAll(tasks);
-            _isLoading = false;
-            _errorMessage = null;
-            _notifyIfActive();
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            if (_currentUserId != subscribedUserId) return;
-            _isLoading = false;
-            _errorMessage = error.toString();
-            _notifyIfActive();
-          },
-        );
+    _subscribeToTasks(userId);
     _notifyIfActive();
+  }
+
+  Future<void> retryLoad() async {
+    final userId = _currentUserId;
+    if (userId == null) return;
+
+    final previousSubscription = _tasksSubscription;
+    _tasksSubscription = null;
+    await previousSubscription?.cancel();
+
+    _errorMessage = null;
+    _isLoading = true;
+    _notifyIfActive();
+    _subscribeToTasks(userId);
+  }
+
+  void _subscribeToTasks(String userId) {
+    try {
+      _tasksSubscription = _repository
+          .watchTasks(userId)
+          .listen(
+            (tasks) {
+              if (_currentUserId != userId) return;
+              _allTasks
+                ..clear()
+                ..addAll(tasks);
+              _isLoading = false;
+              _errorMessage = null;
+              _notifyIfActive();
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              if (_currentUserId != userId) return;
+              _isLoading = false;
+              _errorMessage = error.toString();
+              _notifyIfActive();
+            },
+          );
+    } catch (error) {
+      _isLoading = false;
+      _errorMessage = error.toString();
+      _notifyIfActive();
+    }
   }
 
   Future<void> addTask(Task task) async {
     final userId = _currentUserId;
     if (userId == null) return;
     final newTask = task.copyWith(id: uuid.v4(), userId: userId);
-    await _repository.createTask(newTask);
+    await _runTaskAction(() => _repository.createTask(newTask));
   }
 
   Future<void> updateTask(Task task) async {
     final userId = _currentUserId;
     if (userId == null || task.userId != userId) return;
-    await _repository.updateTask(task);
+    await _runTaskAction(() => _repository.updateTask(task));
   }
 
   Future<void> setTaskStatus(Task task, TaskStatus status) =>
       updateTask(task.copyWith(status: status));
+
   Future<void> removeTask(String taskId) async {
     final userId = _currentUserId;
     if (userId == null) return;
-    await _repository.deleteTask(userId, taskId);
+    await _runTaskAction(() => _repository.deleteTask(userId, taskId));
+  }
+
+  Future<void> _runTaskAction(Future<void> Function() action) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _notifyIfActive();
+    try {
+      await action();
+    } catch (error) {
+      _errorMessage = error.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      _notifyIfActive();
+    }
   }
 
   @override

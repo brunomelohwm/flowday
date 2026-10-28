@@ -108,4 +108,67 @@ void main() {
       controller.dispose();
     },
   );
+  test('task write failure clears loading and exposes an error', () async {
+    when(
+      () => repository.createTask(any()),
+    ).thenThrow(StateError('write unavailable'));
+    final controller = TaskController(repository: repository);
+    controller.setUserId('user-1');
+
+    await expectLater(
+      controller.addTask(
+        const Task(
+          id: 'task-3',
+          userId: 'user-1',
+          title: 'Retry save',
+          description: '',
+          priority: Priority.low,
+        ),
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    expect(controller.isLoading, isFalse);
+    expect(controller.errorMessage, contains('write unavailable'));
+    controller.dispose();
+  });
+
+  test('stream failure can be retried and loads recovered tasks', () async {
+    final failedEvents = StreamController<List<Task>>.broadcast();
+    final recoveredEvents = StreamController<List<Task>>.broadcast();
+    var subscriptionCount = 0;
+    when(() => repository.watchTasks('user-1')).thenAnswer((_) {
+      subscriptionCount++;
+      return subscriptionCount == 1
+          ? failedEvents.stream
+          : recoveredEvents.stream;
+    });
+    const recoveredTask = Task(
+      id: 'recovered',
+      userId: 'user-1',
+      title: 'Recovered task',
+      description: '',
+      priority: Priority.medium,
+    );
+    final controller = TaskController(repository: repository);
+    controller.setUserId('user-1');
+    failedEvents.addError(StateError('stream unavailable'));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.isLoading, isFalse);
+    expect(controller.errorMessage, contains('stream unavailable'));
+
+    await controller.retryLoad();
+    expect(controller.isLoading, isTrue);
+    expect(controller.errorMessage, isNull);
+    recoveredEvents.add(const [recoveredTask]);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.tasks, [recoveredTask]);
+    expect(controller.isLoading, isFalse);
+    expect(controller.errorMessage, isNull);
+    controller.dispose();
+    await failedEvents.close();
+    await recoveredEvents.close();
+  });
 }
