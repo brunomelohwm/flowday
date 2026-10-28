@@ -1,0 +1,14 @@
+{
+  "name": "flowday-firestore-rules-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Isolated Firestore Security Rules tests for Flowday.",
+  "scripts": {
+    "test:rules": "firebase --config ../firebase.json emulators:exec --project demo-flowday-rules --only firestore \"node --test firestore.rules.test.js\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.1.0",
+    "firebase-tools": "15.34.1"
+  }
+}
