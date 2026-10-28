@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flowday/controllers/auth_controller.dart';
 import 'package:flowday/controllers/task_controller.dart';
+import 'package:flowday/repositories/firebase_auth_repository.dart';
+import 'package:flowday/repositories/firestore_task_repository.dart';
 import 'package:flowday/views/splash_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,12 +19,17 @@ void main() async {
     );
   }
   await initializeDateFormatting('pt_BR', null);
-  final taskController = TaskController();
+  final authRepository = FirebaseAuthRepository();
+  final taskRepository = FirestoreTaskRepository();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthController()),
-        ChangeNotifierProvider.value(value: taskController),
+        ChangeNotifierProvider(
+          create: (_) => AuthController(repository: authRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TaskController(repository: taskRepository),
+        ),
       ],
       child: const FlowDayApp(),
     ),

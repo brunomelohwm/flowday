@@ -1,100 +1,100 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flowday/models/task.dart';
+import 'package:flowday/repositories/task_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends ChangeNotifier {
-  final List<Task> _allTasks = [];
-  String? _currentUserId;
-  final uuid = Uuid();
-  StreamSubscription<QuerySnapshot>? _tasksSubscription;
+  TaskController({required TaskRepository repository})
+    : _repository = repository;
 
-  List<Task> get tasks {
-    if (_currentUserId == null) return [];
-    return _allTasks.where((task) => task.userId == _currentUserId).toList();
+  final TaskRepository _repository;
+  final List<Task> _allTasks = [];
+  final Uuid uuid = const Uuid();
+  String? _currentUserId;
+  StreamSubscription<List<Task>>? _tasksSubscription;
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _disposed = false;
+
+  List<Task> get tasks => _currentUserId == null
+      ? []
+      : _allTasks.where((task) => task.userId == _currentUserId).toList();
+  String? get currentUserId => _currentUserId;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  void clearError() {
+    _errorMessage = null;
+    _notifyIfActive();
   }
 
   void setUserId(String? userId) {
+    if (_currentUserId == userId && _tasksSubscription != null) return;
     _currentUserId = userId;
-
     _allTasks.clear();
-    _tasksSubscription?.cancel();
-    if (_currentUserId != null) {
-      _subscribeToTasks();
-    }
-    notifyListeners();
-  }
+    _errorMessage = null;
+    unawaited(_tasksSubscription?.cancel());
+    _tasksSubscription = null;
 
-  void _subscribeToTasks() {
-    _tasksSubscription = FirebaseFirestore.instance
-        .collection('users')
-        .doc(_currentUserId)
-        .collection('tasks')
-        .snapshots()
-        .listen((snapshot) {
-          _allTasks
-            ..clear()
-            ..addAll(
-              snapshot.docs.map(
-                (doc) => Task.fromMap(doc.data(), id: doc.id),
-              ),
-            )
-            ..sort((first, second) {
-              final firstDate = first.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              final secondDate = second.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-              return secondDate.compareTo(firstDate);
-            });
-          notifyListeners();
-        });
+    if (userId == null) {
+      _isLoading = false;
+      _notifyIfActive();
+      return;
+    }
+
+    _isLoading = true;
+    final subscribedUserId = userId;
+    _tasksSubscription = _repository
+        .watchTasks(subscribedUserId)
+        .listen(
+          (tasks) {
+            if (_currentUserId != subscribedUserId) return;
+            _allTasks
+              ..clear()
+              ..addAll(tasks);
+            _isLoading = false;
+            _errorMessage = null;
+            _notifyIfActive();
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (_currentUserId != subscribedUserId) return;
+            _isLoading = false;
+            _errorMessage = error.toString();
+            _notifyIfActive();
+          },
+        );
+    _notifyIfActive();
   }
 
   Future<void> addTask(Task task) async {
-    if (_currentUserId == null) return;
-
-    final newTask = task.copyWith(id: uuid.v4(), userId: _currentUserId!);
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_currentUserId)
-        .collection('tasks')
-        .doc(newTask.id)
-        .set({
-          ...newTask.toMap(),
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+    final userId = _currentUserId;
+    if (userId == null) return;
+    final newTask = task.copyWith(id: uuid.v4(), userId: userId);
+    await _repository.createTask(newTask);
   }
 
   Future<void> updateTask(Task task) async {
-    if (_currentUserId == null || task.userId != _currentUserId) return;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_currentUserId)
-        .collection('tasks')
-        .doc(task.id)
-        .update({
-          ...task.toMap(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+    final userId = _currentUserId;
+    if (userId == null || task.userId != userId) return;
+    await _repository.updateTask(task);
   }
 
   Future<void> removeTask(String taskId) async {
-    if (_currentUserId == null) return;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_currentUserId)
-        .collection('tasks')
-        .doc(taskId)
-        .delete();
+    final userId = _currentUserId;
+    if (userId == null) return;
+    await _repository.deleteTask(userId, taskId);
   }
 
   @override
   void dispose() {
-    _tasksSubscription?.cancel();
+    _disposed = true;
+    unawaited(_tasksSubscription?.cancel());
     super.dispose();
+  }
+
+  void _notifyIfActive() {
+    if (!_disposed) notifyListeners();
   }
 }

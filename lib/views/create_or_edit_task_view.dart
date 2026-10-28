@@ -77,9 +77,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                             decoration: BoxDecoration(
                               color: AppColors.surfaceVariant,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppColors.outline,
-                              ),
+                              border: Border.all(color: AppColors.outline),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<Priority>(
@@ -227,7 +225,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
           child: const Icon(Icons.check, color: AppColors.background),
           onPressed: () async {
             final auth = context.read<AuthController>();
-            if (auth.currentUser == null) return;
+            if (auth.currentUserId == null) return;
 
             final title = titleController.text.trim();
             final description = descriptionController.text.trim();
@@ -244,7 +242,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
 
             final newTask = Task(
               id: widget.task?.id ?? '',
-              userId: auth.currentUser!.uid,
+              userId: auth.currentUserId!,
               title: title,
               description: description,
               priority: selectedPriority,

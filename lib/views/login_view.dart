@@ -51,7 +51,7 @@ class _LoginViewState extends State<LoginView> {
     }
 
     final taskController = context.read<TaskController>();
-    taskController.setUserId(auth.currentUser?.uid);
+    taskController.setUserId(auth.currentUserId);
 
     Navigator.pushReplacement(
       context,

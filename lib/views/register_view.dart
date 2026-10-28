@@ -62,7 +62,7 @@ class _RegisterViewState extends State<RegisterView> {
       return;
     }
 
-    taskController.setUserId(auth.currentUser?.uid);
+    taskController.setUserId(auth.currentUserId);
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Conta criada com sucesso.')));
