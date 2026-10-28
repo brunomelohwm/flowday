@@ -1,0 +1,64 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+      - codex/flowday-portfolio
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java for Firestore Emulator
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Node.js for Firebase CLI
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: firebase-tests/package-lock.json
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.41.7'
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Install Firestore rules test dependencies
+        run: npm ci --prefix firebase-tests
+
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze Flutter code
+        run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
+
+      - name: Run widget tests not in the default test suite
+        run: |
+          flutter test test/widgets/task_load_feedback_test.dart
+          flutter test test/views/task_card_widget_test.dart
+
+      - name: Test Firestore ownership rules
+        run: npm --prefix firebase-tests run test:rules
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
