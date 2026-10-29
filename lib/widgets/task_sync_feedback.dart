@@ -76,7 +76,7 @@ class TaskSyncFeedback extends StatelessWidget {
           Expanded(
             child: Text(message, style: TextStyle(color: color, fontSize: 13)),
           ),
-          if (trailing != null) trailing,
+          ?trailing,
         ],
       ),
     ),
