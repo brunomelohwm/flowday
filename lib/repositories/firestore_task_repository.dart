@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flowday/data/task_document_mapper.dart';
 import 'package:flowday/models/task.dart';
+import 'package:flowday/models/task_sync_update.dart';
 import 'package:flowday/repositories/task_repository.dart';
 
 class FirestoreTaskRepository implements TaskRepository {
@@ -13,8 +14,8 @@ class FirestoreTaskRepository implements TaskRepository {
       _firestore.collection('users').doc(userId).collection('tasks');
 
   @override
-  Stream<List<Task>> watchTasks(String userId) =>
-      _tasksFor(userId).snapshots().map((snapshot) {
+  Stream<TaskSyncUpdate> watchTasks(String userId) =>
+      _tasksFor(userId).snapshots(includeMetadataChanges: true).map((snapshot) {
         final tasks = snapshot.docs
             .map(
               (document) =>
@@ -28,7 +29,10 @@ class FirestoreTaskRepository implements TaskRepository {
               second.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           return secondDate.compareTo(firstDate);
         });
-        return tasks;
+        return TaskSyncUpdate(
+          tasks: tasks,
+          hasPendingWrites: snapshot.metadata.hasPendingWrites,
+        );
       });
 
   @override

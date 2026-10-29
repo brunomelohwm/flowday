@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/models/task.dart';
+import 'package:flowday/models/task_sync_update.dart';
 import 'package:flowday/repositories/task_repository.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,11 @@ void main() {
 
   setUp(() {
     repository = MockCardTaskRepository();
-    when(
-      () => repository.watchTasks('user-1'),
-    ).thenAnswer((_) => Stream.value(const <Task>[]));
+    when(() => repository.watchTasks('user-1')).thenAnswer(
+      (_) => Stream.value(
+        TaskSyncUpdate(tasks: const <Task>[], hasPendingWrites: false),
+      ),
+    );
     when(() => repository.updateTask(any())).thenAnswer((_) async {});
   });
 
