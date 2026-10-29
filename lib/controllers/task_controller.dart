@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flowday/Utils/sort_tasks_by_due_date.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flowday/repositories/task_repository.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,12 @@ class TaskController extends ChangeNotifier {
   List<Task> get tasks => _currentUserId == null
       ? []
       : _allTasks.where((task) => task.userId == _currentUserId).toList();
+  List<Task> get openTasks => sortTasksByDueDate(
+    tasks.where((task) => task.status != TaskStatus.done),
+  );
+  List<Task> get completedTasks => sortTasksByDueDate(
+    tasks.where((task) => task.status == TaskStatus.done),
+  );
   String? get currentUserId => _currentUserId;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;

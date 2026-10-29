@@ -84,6 +84,45 @@ void main() {
     controller.dispose();
   });
 
+  test('separates open and completed tasks while retaining all for calendar', () async {
+    final todoTask = Task(
+      id: 'todo',
+      userId: 'user-1',
+      title: 'Todo',
+      description: '',
+      priority: Priority.none,
+      endDate: DateTime(2026, 11, 3),
+    );
+    final inProgressTask = Task(
+      id: 'in-progress',
+      userId: 'user-1',
+      title: 'In progress',
+      description: '',
+      priority: Priority.none,
+      status: TaskStatus.inProgress,
+      endDate: DateTime(2026, 11, 2),
+    );
+    const completedTask = Task(
+      id: 'completed',
+      userId: 'user-1',
+      title: 'Completed',
+      description: '',
+      priority: Priority.none,
+      status: TaskStatus.done,
+    );
+
+    final controller = TaskController(repository: repository);
+    controller.setUserId('user-1');
+    taskEvents.add([todoTask, completedTask, inProgressTask]);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.openTasks, [inProgressTask, todoTask]);
+    expect(controller.completedTasks, [completedTask]);
+    expect(controller.tasks, [todoTask, completedTask, inProgressTask]);
+
+    controller.dispose();
+  });
+
   test(
     'setTaskStatus persists a completed status for the current user',
     () async {
