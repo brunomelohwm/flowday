@@ -314,8 +314,8 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                       SnackBar(
                         content: Text(
                           widget.task == null
-                              ? "Tarefa criada com sucesso."
-                              : "Tarefa atualizada com sucesso.",
+                              ? "Tarefa criada no app."
+                              : "Tarefa atualizada no app.",
                         ),
                       ),
                     );
