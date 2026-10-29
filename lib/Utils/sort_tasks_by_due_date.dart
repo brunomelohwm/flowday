@@ -1,6 +1,6 @@
 import 'package:flowday/models/task.dart';
 
-List<Task> sortTasksByDueDate(Iterable<Task> tasks) {
+List<Task> sortTasksByDueDate(Iterable<Task> tasks, {bool descending = false}) {
   final sortedTasks = tasks.toList();
   sortedTasks.sort((first, second) {
     final firstDueDate = first.endDate;
@@ -9,7 +9,9 @@ List<Task> sortTasksByDueDate(Iterable<Task> tasks) {
     if (firstDueDate != null && secondDueDate == null) return -1;
     if (firstDueDate != null && secondDueDate != null) {
       final dueDateOrder = firstDueDate.compareTo(secondDueDate);
-      if (dueDateOrder != 0) return dueDateOrder;
+      if (dueDateOrder != 0) {
+        return descending ? -dueDateOrder : dueDateOrder;
+      }
     }
 
     final firstCreatedAt = first.createdAt;

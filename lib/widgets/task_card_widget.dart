@@ -12,11 +12,13 @@ import 'package:flutter/material.dart';
 class TaskCardWidget extends StatefulWidget {
   final Task task;
   final TaskController controller;
+  final bool dimCompleted;
 
   const TaskCardWidget({
     super.key,
     required this.task,
     required this.controller,
+    this.dimCompleted = false,
   });
 
   @override
@@ -104,104 +106,116 @@ class _TaskCardWidgetState extends State<TaskCardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CreateOrEditTaskView(
-              controller: widget.controller,
-              task: widget.task,
-            ),
-          ),
-        );
-      },
-      onLongPress: _confirmDelete,
-      child: GlassContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                widget.task.priority.widget,
-                const Spacer(),
-                IconButton(
-                  tooltip: widget.task.status == TaskStatus.done
-                      ? 'Reabrir tarefa'
-                      : 'Concluir tarefa',
-                  onPressed: widget.controller.isLoading
-                      ? null
-                      : _toggleCompletion,
-                  icon: widget.controller.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          widget.task.status == TaskStatus.done
-                              ? Icons.check_circle
-                              : Icons.circle_outlined,
-                          color: widget.task.status == TaskStatus.done
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
-                        ),
-                ),
-              ],
-            ),
-            Text(
-              _statusLabel,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
+    return Opacity(
+      opacity: widget.dimCompleted && widget.task.status == TaskStatus.done
+          ? 0.62
+          : 1,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CreateOrEditTaskView(
+                controller: widget.controller,
+                task: widget.task,
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              widget.task.title,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-                color: AppColors.textPrimary,
+          );
+        },
+        onLongPress: _confirmDelete,
+        child: GlassContainer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  widget.task.priority.widget,
+                  const Spacer(),
+                  Tooltip(
+                    message: widget.task.status == TaskStatus.done
+                        ? 'Reabrir'
+                        : 'Marcar como concluída',
+                    child: TextButton.icon(
+                      onPressed: widget.controller.isLoading
+                          ? null
+                          : _toggleCompletion,
+                      icon: widget.controller.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              widget.task.status == TaskStatus.done
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: widget.task.status == TaskStatus.done
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
+                      label: Text(
+                        widget.task.status == TaskStatus.done
+                            ? 'Reabrir'
+                            : 'Marcar como concluída',
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Row(
-              children: [
-                const Icon(
-                  Icons.timer_outlined,
+              Text(
+                _statusLabel,
+                style: const TextStyle(
                   color: AppColors.textSecondary,
-                  size: 18,
+                  fontSize: 12,
                 ),
-                const SizedBox(width: 4),
-                buildDateInfo(widget.task),
-              ],
-            ),
-            if (widget.task.endDate != null)
-              Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.xs),
-                child: Text(
-                  'Data final: ${formatMonthDay(widget.task.endDate!)}',
-                  style: const TextStyle(
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                widget.task.title,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.timer_outlined,
                     color: AppColors.textSecondary,
-                    fontSize: 12,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 4),
+                  buildDateInfo(widget.task),
+                ],
+              ),
+              if (widget.task.endDate != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xs),
+                  child: Text(
+                    'Data final: ${formatMonthDay(widget.task.endDate!)}',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                widget.task.description.isEmpty
+                    ? 'Sem descrição'
+                    : widget.task.description,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              widget.task.description.isEmpty
-                  ? 'Sem descrição'
-                  : widget.task.description,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

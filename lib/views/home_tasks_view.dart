@@ -4,6 +4,7 @@ import 'package:flowday/Utils/build_date_info.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
 import 'package:flowday/widgets/task_load_feedback.dart';
 import 'package:flowday/views/all_tasks_view.dart';
+import 'package:flowday/views/completed_tasks_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/themes/app_colors.dart';
 import 'package:flowday/themes/app_spacing.dart';
@@ -60,7 +61,7 @@ class HomeTasksView extends StatelessWidget {
           AnimatedBuilder(
             animation: controller,
             builder: (_, _) => Text(
-              _contextualMessage(controller.tasks),
+              _contextualMessage(controller.openTasks),
               style: const TextStyle(
                 fontSize: 20,
                 color: AppColors.textSecondary,
@@ -85,15 +86,25 @@ class HomeTasksView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Suas tarefas',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+              const Expanded(
+                child: Text(
+                  'Suas tarefas',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CompletedTasksView(controller: controller),
+                  ),
+                ),
+                child: const Text('Concluídas'),
               ),
               TextButton(
                 onPressed: () => Navigator.push(
@@ -113,7 +124,7 @@ class HomeTasksView extends StatelessWidget {
             child: AnimatedBuilder(
               animation: controller,
               builder: (_, _) {
-                final tasks = controller.tasks;
+                final tasks = controller.openTasks;
                 if (tasks.isEmpty && controller.isLoading) {
                   return TaskLoadFeedback(
                     isLoading: true,

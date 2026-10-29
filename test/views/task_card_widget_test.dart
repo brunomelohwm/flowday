@@ -64,8 +64,8 @@ void main() {
         );
 
         await tester.tap(
-          find.byTooltip(
-            status == TaskStatus.done ? 'Reabrir tarefa' : 'Concluir tarefa',
+          find.text(
+            status == TaskStatus.done ? 'Reabrir' : 'Marcar como concluída',
           ),
         );
         await tester.pumpAndSettle();

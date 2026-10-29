@@ -253,6 +253,7 @@ class _CalendarViewState extends State<CalendarView> {
                       child: TaskCardWidget(
                         controller: taskController,
                         task: tasksForDate[index],
+                        dimCompleted: true,
                       ),
                     );
                   },

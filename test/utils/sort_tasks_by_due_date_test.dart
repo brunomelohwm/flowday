@@ -3,39 +3,56 @@ import 'package:flowday/models/task.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('sorts by due date, then creation time, then id with no due date last', () {
-    final tasks = [
-      _task('no-date', endDate: null),
-      _task('later', endDate: DateTime(2026, 11, 3)),
-      _task(
-        'older-created',
-        endDate: DateTime(2026, 11, 2),
-        createdAt: DateTime(2026, 10, 1),
-      ),
-      _task(
+  test(
+    'sorts by due date, then creation time, then id with no due date last',
+    () {
+      final tasks = [
+        _task('no-date', endDate: null),
+        _task('later', endDate: DateTime(2026, 11, 3)),
+        _task(
+          'older-created',
+          endDate: DateTime(2026, 11, 2),
+          createdAt: DateTime(2026, 10, 1),
+        ),
+        _task(
+          'newer-created',
+          endDate: DateTime(2026, 11, 2),
+          createdAt: DateTime(2026, 10, 2),
+        ),
+        _task(
+          'tie-b',
+          endDate: DateTime(2026, 11, 2),
+          createdAt: DateTime(2026, 10, 2),
+        ),
+        _task(
+          'tie-a',
+          endDate: DateTime(2026, 11, 2),
+          createdAt: DateTime(2026, 10, 2),
+        ),
+      ];
+
+      final sorted = sortTasksByDueDate(tasks);
+
+      expect(sorted.map((task) => task.id), [
         'newer-created',
-        endDate: DateTime(2026, 11, 2),
-        createdAt: DateTime(2026, 10, 2),
-      ),
-      _task(
-        'tie-b',
-        endDate: DateTime(2026, 11, 2),
-        createdAt: DateTime(2026, 10, 2),
-      ),
-      _task(
         'tie-a',
-        endDate: DateTime(2026, 11, 2),
-        createdAt: DateTime(2026, 10, 2),
-      ),
-    ];
+        'tie-b',
+        'older-created',
+        'later',
+        'no-date',
+      ]);
+      expect(tasks.first.id, 'no-date');
+    },
+  );
 
-    final sorted = sortTasksByDueDate(tasks);
+  test('descending due dates still leave tasks without a date last', () {
+    final sorted = sortTasksByDueDate([
+      _task('no-date'),
+      _task('near', endDate: DateTime(2026, 11, 2)),
+      _task('far', endDate: DateTime(2026, 11, 3)),
+    ], descending: true);
 
-    expect(
-      sorted.map((task) => task.id),
-      ['newer-created', 'tie-a', 'tie-b', 'older-created', 'later', 'no-date'],
-    );
-    expect(tasks.first.id, 'no-date');
+    expect(sorted.map((task) => task.id), ['far', 'near', 'no-date']);
   });
 }
 
