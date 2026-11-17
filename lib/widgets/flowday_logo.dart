@@ -5,11 +5,7 @@ class FlowDayLogo extends StatelessWidget {
   final double iconSize;
   final double fontSize;
 
-  const FlowDayLogo({
-    super.key,
-    this.iconSize = 44,
-    this.fontSize = 30,
-  });
+  const FlowDayLogo({super.key, this.iconSize = 44, this.fontSize = 30});
 
   @override
   Widget build(BuildContext context) {

@@ -27,10 +27,21 @@ class _ProfileViewState extends State<ProfileView> {
     final auth = context.read<AuthController>();
     final taskController = context.read<TaskController>();
 
-    taskController.setUserId(null);
-    await auth.logout();
+    final loggedOut = await auth.logout();
 
     if (!mounted) return;
+
+    if (!loggedOut) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Não foi possível sair.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    taskController.setUserId(null);
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -160,7 +171,27 @@ class _ProfileViewState extends State<ProfileView> {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: user == null
-            ? const SizedBox.shrink()
+            ? Center(
+                child: auth.isLoading
+                    ? const CircularProgressIndicator(color: AppColors.primary)
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            auth.errorMessage ?? 'Perfil indisponível.',
+                            textAlign: TextAlign.center,
+                          ),
+                          if (auth.errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: auth.retryLoadProfile,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Tentar novamente'),
+                            ),
+                          ],
+                        ],
+                      ),
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

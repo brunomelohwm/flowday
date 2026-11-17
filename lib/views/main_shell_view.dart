@@ -4,6 +4,7 @@ import 'package:flowday/views/calendar_view.dart';
 import 'package:flowday/views/home_tasks_view.dart';
 import 'package:flowday/views/profile_view.dart';
 import 'package:flowday/widgets/flow_bottom_bar.dart';
+import 'package:flowday/widgets/task_sync_feedback.dart';
 import 'package:flutter/material.dart';
 
 class MainShellView extends StatefulWidget {
@@ -30,7 +31,14 @@ class _MainShellViewState extends State<MainShellView> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: IndexedStack(index: _currentIndex, children: pages),
+          child: Column(
+            children: [
+              TaskSyncFeedback(controller: widget.taskController),
+              Expanded(
+                child: IndexedStack(index: _currentIndex, children: pages),
+              ),
+            ],
+          ),
         ),
         bottomNavigationBar: FlowBottomBar(
           currentIndex: _currentIndex,

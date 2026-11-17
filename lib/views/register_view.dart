@@ -53,16 +53,10 @@ class _RegisterViewState extends State<RegisterView> {
     if (!mounted) return;
 
     if (!registered) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(auth.errorMessage ?? 'Erro ao criar conta'),
-          backgroundColor: Colors.red,
-        ),
-      );
       return;
     }
 
-    taskController.setUserId(auth.currentUser?.uid);
+    taskController.setUserId(auth.currentUserId);
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Conta criada com sucesso.')));
@@ -207,6 +201,34 @@ class _RegisterViewState extends State<RegisterView> {
                     },
                   ),
                   const SizedBox(height: 32),
+                  Consumer<AuthController>(
+                    builder: (context, auth, _) {
+                      final error = auth.errorMessage;
+                      if (error == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Material(
+                          color: Colors.red.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                            ),
+                            title: Text(
+                              error,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                            trailing: IconButton(
+                              tooltip: 'Fechar mensagem',
+                              onPressed: auth.clearError,
+                              icon: const Icon(Icons.close, color: Colors.red),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   SizedBox(
                     width: double.infinity,
                     height: 48,

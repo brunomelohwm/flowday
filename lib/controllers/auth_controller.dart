@@ -1,44 +1,40 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'dart:async';
+
 import 'package:flowday/models/user.dart';
+import 'package:flowday/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 
 class AuthController extends ChangeNotifier {
-  final fb_auth.FirebaseAuth _auth = fb_auth.FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  AuthController({required AuthRepository repository})
+    : _repository = repository {
+    _currentUserId = _repository.currentUserId;
+    if (_currentUserId != null) {
+      _isLoading = true;
+      unawaited(_loadProfile(_currentUserId!));
+    }
+    _authStateSubscription = _repository.authStateChanges().listen(
+      (userId) => unawaited(_handleAuthStateChange(userId)),
+      onError: _handleAuthStateError,
+    );
+  }
 
-  fb_auth.User? _currentUser;
+  final AuthRepository _repository;
+  StreamSubscription<String?>? _authStateSubscription;
+  String? _currentUserId;
   User? _user;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _disposed = false;
 
   User? get user => _user;
-
-  fb_auth.User? get currentUser => _currentUser;
-  bool get isAuthenticated => _currentUser != null;
+  String? get currentUserId => _currentUserId;
+  bool get isAuthenticated => _currentUserId != null;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  AuthController() {
-    _currentUser = _auth.currentUser;
-
-    if (_currentUser != null) {
-      _loadUser();
-    }
-    _auth.authStateChanges().listen((user) async {
-      _currentUser = user;
-      if (user != null) {
-        await _loadUser();
-      } else {
-        _user = null;
-      }
-      notifyListeners();
-    });
-  }
-
   void clearError() {
     _errorMessage = null;
-    notifyListeners();
+    _notifyIfActive();
   }
 
   Future<bool> register({
@@ -46,154 +42,121 @@ class AuthController extends ChangeNotifier {
     required String password,
     required String name,
     required String lastName,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  }) => _runAuthAction(() async {
+    await _repository.register(
+      email: email,
+      password: password,
+      name: name,
+      lastName: lastName,
+    );
+    final userId = _repository.currentUserId;
+    if (userId == null) throw StateError('Cadastro não retornou um usuário.');
+    _currentUserId = userId;
+    _user = await _repository.loadProfile(userId);
+  });
 
-    try {
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      _currentUser = credential.user;
-
-      await _firestore.collection('users').doc(_currentUser!.uid).set({
-        'id': _currentUser!.uid,
-        'email': email,
-        'name': name,
-        'lastName': lastName,
+  Future<bool> login({required String email, required String password}) =>
+      _runAuthAction(() async {
+        await _repository.signIn(email: email, password: password);
+        final userId = _repository.currentUserId;
+        if (userId == null) throw StateError('Login não retornou um usuário.');
+        _currentUserId = userId;
+        _user = await _repository.loadProfile(userId);
       });
-    } on fb_auth.FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: $e';
-    }
 
-    _isLoading = false;
-    notifyListeners();
-    return _errorMessage == null && _currentUser != null;
-  }
+  Future<bool> sendPasswordResetEmail(String email) =>
+      _runAuthAction(() => _repository.sendPasswordResetEmail(email));
 
-  Future<bool> login({required String email, required String password}) async {
+  Future<void> retryLoadProfile() async {
+    final userId = _currentUserId;
+    if (userId == null) return;
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final credential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      _currentUser = credential.user;
-      await _loadUser();
-    } on fb_auth.FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
-    return _errorMessage == null && _currentUser != null;
+    _notifyIfActive();
+    await _loadProfile(userId);
   }
 
-  Future<void> _loadUser() async {
-    if (_currentUser == null) return;
+  Future<bool> deleteAccount({required String password}) =>
+      _runAuthAction(() async {
+        await _repository.deleteAccount(password: password);
+        _currentUserId = null;
+        _user = null;
+      });
 
-    final doc = await _firestore
-        .collection('users')
-        .doc(_currentUser!.uid)
-        .get();
-
-    if (doc.exists) {
-      _user = User.fromMap(doc.data()!);
-    } else {
+  Future<bool> logout() async {
+    _isLoading = true;
+    _errorMessage = null;
+    _notifyIfActive();
+    try {
+      await _repository.signOut();
+      _currentUserId = null;
       _user = null;
-    }
-  }
-
-  Future<bool> sendPasswordResetEmail(String email) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } on fb_auth.FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
-    return _errorMessage == null;
-  }
-
-  Future<bool> deleteAccount({required String password}) async {
-    final user = _auth.currentUser;
-    final email = user?.email;
-    if (user == null || email == null) {
-      _errorMessage = 'Usuário não autenticado.';
-      notifyListeners();
+      return true;
+    } catch (error) {
+      _errorMessage = error.toString();
       return false;
+    } finally {
+      _isLoading = false;
+      _notifyIfActive();
     }
+  }
 
+  Future<bool> _runAuthAction(Future<void> Function() action) async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
-
+    _notifyIfActive();
     try {
-      final credential = fb_auth.EmailAuthProvider.credential(
-        email: email,
-        password: password,
-      );
-      await user.reauthenticateWithCredential(credential);
-      await _deleteUserData(user.uid);
-      await user.delete();
-      _currentUser = null;
-      _user = null;
-    } on fb_auth.FirebaseAuthException catch (e) {
-      _errorMessage = e.message;
-    } catch (e) {
-      _errorMessage = 'Erro inesperado: $e';
+      await action();
+      return true;
+    } catch (error) {
+      _errorMessage = error.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      _notifyIfActive();
     }
-
-    _isLoading = false;
-    notifyListeners();
-    return _errorMessage == null;
   }
 
-  Future<void> _deleteUserData(String uid) async {
-    final userRef = _firestore.collection('users').doc(uid);
-
-    final tasksSnapshot = await userRef.collection('tasks').get();
-
-    WriteBatch batch = _firestore.batch();
-    int opCount = 0;
-
-    for (final doc in tasksSnapshot.docs) {
-      batch.delete(doc.reference);
-      opCount++;
-
-      if (opCount >= 450) {
-        await batch.commit();
-        batch = _firestore.batch();
-        opCount = 0;
-      }
-    }
-
-    await batch.commit();
-
-    await userRef.delete();
-  }
-
-  Future<void> logout() async {
-    await _auth.signOut();
-    _currentUser = null;
+  Future<void> _handleAuthStateChange(String? userId) async {
+    if (_disposed) return;
+    _currentUserId = userId;
     _user = null;
-    notifyListeners();
+    if (userId == null) {
+      _isLoading = false;
+      _notifyIfActive();
+      return;
+    }
+    _isLoading = true;
+    _notifyIfActive();
+    await _loadProfile(userId);
+  }
+
+  Future<void> _loadProfile(String userId) async {
+    try {
+      final profile = await _repository.loadProfile(userId);
+      if (_currentUserId == userId) _user = profile;
+    } catch (error) {
+      _errorMessage = error.toString();
+    } finally {
+      if (_currentUserId == userId) _isLoading = false;
+      _notifyIfActive();
+    }
+  }
+
+  void _handleAuthStateError(Object error, StackTrace stackTrace) {
+    _errorMessage = error.toString();
+    _isLoading = false;
+    _notifyIfActive();
+  }
+
+  void _notifyIfActive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    unawaited(_authStateSubscription?.cancel());
+    super.dispose();
   }
 }

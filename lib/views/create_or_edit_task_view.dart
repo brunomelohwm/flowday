@@ -18,9 +18,15 @@ class CreateOrEditTaskView extends StatefulWidget {
 }
 
 class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
+  String _statusLabel(TaskStatus status) => switch (status) {
+    TaskStatus.todo => 'A fazer',
+    TaskStatus.inProgress => 'Em andamento',
+    TaskStatus.done => 'Concluída',
+  };
   late TextEditingController titleController;
   late TextEditingController descriptionController;
   Priority selectedPriority = Priority.none;
+  TaskStatus selectedStatus = TaskStatus.todo;
   DateTime? startDate;
   DateTime? endDate;
 
@@ -32,6 +38,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
       text: widget.task?.description ?? '',
     );
     selectedPriority = widget.task?.priority ?? Priority.none;
+    selectedStatus = widget.task?.status ?? TaskStatus.todo;
 
     startDate = widget.task?.startDate;
     endDate = widget.task?.endDate;
@@ -77,9 +84,7 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                             decoration: BoxDecoration(
                               color: AppColors.surfaceVariant,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppColors.outline,
-                              ),
+                              border: Border.all(color: AppColors.outline),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<Priority>(
@@ -196,6 +201,24 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
                     ),
                   ),
                   Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: DropdownButtonFormField<TaskStatus>(
+                      initialValue: selectedStatus,
+                      decoration: const InputDecoration(labelText: 'Status'),
+                      items: TaskStatus.values.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(_statusLabel(status)),
+                        );
+                      }).toList(),
+                      onChanged: (status) {
+                        if (status != null) {
+                          setState(() => selectedStatus = status);
+                        }
+                      },
+                    ),
+                  ),
+                  Padding(
                     padding: const EdgeInsets.all(16),
                     child: TextField(
                       style: const TextStyle(color: AppColors.textPrimary),
@@ -221,77 +244,94 @@ class _CreateOrEditTaskViewState extends State<CreateOrEditTaskView> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          disabledElevation: 0,
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.check, color: AppColors.background),
-          onPressed: () async {
-            final auth = context.read<AuthController>();
-            if (auth.currentUser == null) return;
+        floatingActionButton: AnimatedBuilder(
+          animation: widget.controller,
+          builder: (context, _) => FloatingActionButton(
+            disabledElevation: 0,
+            backgroundColor: AppColors.primary,
+            onPressed: widget.controller.isLoading
+                ? null
+                : () async {
+                    final auth = context.read<AuthController>();
+                    if (auth.currentUserId == null) return;
 
-            final title = titleController.text.trim();
-            final description = descriptionController.text.trim();
+                    final title = titleController.text.trim();
+                    final description = descriptionController.text.trim();
 
-            if (title.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Informe um título para salvar a tarefa."),
-                  backgroundColor: Colors.red,
-                ),
-              );
-              return;
-            }
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Informe um título para salvar a tarefa.",
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
 
-            final newTask = Task(
-              id: widget.task?.id ?? '',
-              userId: auth.currentUser!.uid,
-              title: title,
-              description: description,
-              priority: selectedPriority,
-              startDate: startDate,
-              endDate: endDate,
-            );
-            if (startDate != null &&
-                endDate != null &&
-                endDate!.isBefore(startDate!)) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    "A data de término não pode ser antes da data de início",
-                  ),
-                ),
-              );
-              return;
-            }
-            try {
-              if (widget.task == null) {
-                await widget.controller.addTask(newTask);
-              } else {
-                await widget.controller.updateTask(newTask);
-              }
-            } catch (_) {
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Não foi possível salvar a tarefa."),
-                  backgroundColor: Colors.red,
-                ),
-              );
-              return;
-            }
+                    final newTask = Task(
+                      id: widget.task?.id ?? '',
+                      userId: auth.currentUserId!,
+                      title: title,
+                      description: description,
+                      priority: selectedPriority,
+                      status: selectedStatus,
+                      startDate: startDate,
+                      endDate: endDate,
+                    );
+                    if (startDate != null &&
+                        endDate != null &&
+                        endDate!.isBefore(startDate!)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "A data de término não pode ser antes da data de início",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    try {
+                      if (widget.task == null) {
+                        await widget.controller.addTask(newTask);
+                      } else {
+                        await widget.controller.updateTask(newTask);
+                      }
+                    } catch (_) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Não foi possível salvar a tarefa."),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
 
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  widget.task == null
-                      ? "Tarefa criada com sucesso."
-                      : "Tarefa atualizada com sucesso.",
-                ),
-              ),
-            );
-            Navigator.pop(context);
-          },
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          widget.task == null
+                              ? "Tarefa criada no app."
+                              : "Tarefa atualizada no app.",
+                        ),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
+            child: widget.controller.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: AppColors.background,
+                    ),
+                  )
+                : const Icon(Icons.check, color: AppColors.background),
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),

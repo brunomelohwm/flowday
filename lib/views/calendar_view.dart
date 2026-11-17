@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
-import 'package:flowday/models/task.dart';
+import 'package:flowday/widgets/task_load_feedback.dart';
+import 'package:flowday/Utils/build_date_info.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flowday/themes/app_colors.dart';
@@ -57,34 +58,6 @@ class _CalendarViewState extends State<CalendarView> {
       });
       _scrollToSelectedDate();
     }
-  }
-
-  Map<DateTime, List<Task>> _groupTasksByDate(List<Task> tasks) {
-    final Map<DateTime, List<Task>> grouped = {};
-
-    for (var task in tasks) {
-      DateTime? taskDate;
-      if (task.startDate != null) {
-        taskDate = DateTime(
-          task.startDate!.year,
-          task.startDate!.month,
-          task.startDate!.day,
-        );
-      } else if (task.endDate != null) {
-        taskDate = DateTime(
-          task.endDate!.year,
-          task.endDate!.month,
-          task.endDate!.day,
-        );
-      }
-
-      if (taskDate != null) {
-        final dateKey = DateTime(taskDate.year, taskDate.month, taskDate.day);
-        grouped.putIfAbsent(dateKey, () => []).add(task);
-      }
-    }
-
-    return grouped;
   }
 
   @override
@@ -198,12 +171,35 @@ class _CalendarViewState extends State<CalendarView> {
           ),
           const SizedBox(height: AppSpacing.lg),
 
+          Text(
+            DateFormat('EEEE, d MMMM yyyy', 'pt_BR').format(_selectedDate),
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Expanded(
             child: AnimatedBuilder(
               animation: taskController,
               builder: (context, _) {
                 final tasks = taskController.tasks;
-                final groupedTasks = _groupTasksByDate(tasks);
+                if (tasks.isEmpty && taskController.isLoading) {
+                  return TaskLoadFeedback(
+                    isLoading: true,
+                    errorMessage: null,
+                    onRetry: taskController.retryLoad,
+                  );
+                }
+                if (taskController.errorMessage != null) {
+                  return TaskLoadFeedback(
+                    isLoading: false,
+                    errorMessage: taskController.errorMessage,
+                    onRetry: taskController.retryLoad,
+                  );
+                }
+                final groupedTasks = groupTasksByCalendarDay(tasks);
 
                 final selectedDateKey = DateTime(
                   _selectedDate.year,
@@ -257,6 +253,7 @@ class _CalendarViewState extends State<CalendarView> {
                       child: TaskCardWidget(
                         controller: taskController,
                         task: tasksForDate[index],
+                        dimCompleted: true,
                       ),
                     );
                   },

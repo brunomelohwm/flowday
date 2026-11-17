@@ -41,17 +41,11 @@ class _LoginViewState extends State<LoginView> {
     if (!mounted) return;
 
     if (!loggedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(auth.errorMessage ?? 'Erro ao entrar'),
-          backgroundColor: Colors.red,
-        ),
-      );
       return;
     }
 
     final taskController = context.read<TaskController>();
-    taskController.setUserId(auth.currentUser?.uid);
+    taskController.setUserId(auth.currentUserId);
 
     Navigator.pushReplacement(
       context,
@@ -197,6 +191,34 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  Consumer<AuthController>(
+                    builder: (context, auth, _) {
+                      final error = auth.errorMessage;
+                      if (error == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Material(
+                          color: Colors.red.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                            ),
+                            title: Text(
+                              error,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                            trailing: IconButton(
+                              tooltip: 'Fechar mensagem',
+                              onPressed: auth.clearError,
+                              icon: const Icon(Icons.close, color: Colors.red),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   SizedBox(
                     width: double.infinity,
                     height: 48,

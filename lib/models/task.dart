@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 enum Priority { none, low, medium, high }
 
-enum Status { todo, inProgress, done }
+enum TaskStatus { todo, inProgress, done }
 
 class Task {
   final String id;
@@ -11,17 +8,19 @@ class Task {
   final String title;
   final String description;
   final Priority priority;
+  final TaskStatus status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? startDate;
   final DateTime? endDate;
 
-  Task({
+  const Task({
     required this.id,
     required this.userId,
     required this.title,
     required this.description,
     required this.priority,
+    this.status = TaskStatus.todo,
     this.createdAt,
     this.updatedAt,
     this.startDate,
@@ -36,9 +35,9 @@ class Task {
     Priority? priority,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? dueDate,
     DateTime? startDate,
     DateTime? endDate,
+    TaskStatus? status,
   }) {
     return Task(
       id: id ?? this.id,
@@ -46,52 +45,11 @@ class Task {
       title: title ?? this.title,
       description: description ?? this.description,
       priority: priority ?? this.priority,
+      status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );
   }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'title': title,
-      'description': description,
-      'priority': priority.name,
-      if (createdAt != null) 'createdAt': Timestamp.fromDate(createdAt!),
-      if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
-      'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
-      'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
-    };
-  }
-
-  factory Task.fromMap(Map<String, dynamic> map, {String? id}) {
-    Timestamp? ts(dynamic value) {
-      if (value is Timestamp) return value;
-      return null;
-    }
-
-    return Task(
-      id: id ?? '',
-      userId: map['userId'] ?? '',
-      title: map['title'] ?? '',
-      description: map['description'] ?? '',
-      priority: map['priority'] != null
-          ? Priority.values.firstWhere(
-              (e) => e.name == map['priority'],
-              orElse: () => Priority.none,
-            )
-          : Priority.none,
-      createdAt: ts(map['createdAt'])?.toDate(),
-      updatedAt: ts(map['updatedAt'])?.toDate(),
-      startDate: ts(map['startDate'])?.toDate(),
-      endDate: ts(map['endDate'])?.toDate(),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory Task.fromJson(String source, {String? id}) =>
-      Task.fromMap(json.decode(source), id: id);
 }

@@ -8,9 +8,7 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-      ),
+      decoration: const BoxDecoration(color: AppColors.background),
       child: child,
     );
   }
