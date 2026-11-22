@@ -4,7 +4,7 @@ import 'package:flowday/models/task.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/widgets/date_field.dart';
 import 'package:flowday/widgets/priority_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:flowday/themes/app_colors.dart';
 

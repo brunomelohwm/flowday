@@ -5,7 +5,7 @@ import 'package:flowday/models/task.dart';
 import 'package:flowday/models/task_sync_update.dart';
 import 'package:flowday/repositories/task_repository.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

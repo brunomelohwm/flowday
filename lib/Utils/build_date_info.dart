@@ -1,6 +1,6 @@
 import 'package:flowday/Utils/date_formatters.dart';
 import 'package:flowday/models/task.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flowday/themes/app_colors.dart';
 
 Widget buildDateInfo(Task task) {

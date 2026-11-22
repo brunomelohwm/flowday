@@ -4,7 +4,7 @@ import 'package:flowday/Utils/sort_tasks_by_due_date.dart';
 import 'package:flowday/models/task.dart';
 import 'package:flowday/models/task_sync_update.dart';
 import 'package:flowday/repositories/task_repository.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskController extends ChangeNotifier {

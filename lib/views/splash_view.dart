@@ -3,7 +3,7 @@ import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_background.dart';
 import 'package:flowday/views/login_view.dart';
 import 'package:flowday/views/main_shell_view.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:flowday/themes/app_colors.dart';
 
