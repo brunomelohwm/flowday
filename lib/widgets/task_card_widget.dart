@@ -7,7 +7,7 @@ import 'package:flowday/themes/app_spacing.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/widgets/glass_container.dart';
 import 'package:flowday/widgets/priority_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TaskCardWidget extends StatefulWidget {
   final Task task;

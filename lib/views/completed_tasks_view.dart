@@ -5,7 +5,7 @@ import 'package:flowday/themes/app_spacing.dart';
 import 'package:flowday/widgets/due_date_sort_button.dart';
 import 'package:flowday/widgets/task_card_widget.dart';
 import 'package:flowday/widgets/task_load_feedback.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CompletedTasksView extends StatefulWidget {
   const CompletedTasksView({super.key, required this.controller});

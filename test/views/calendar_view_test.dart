@@ -3,8 +3,10 @@ import 'package:flowday/models/task.dart';
 import 'package:flowday/models/task_sync_update.dart';
 import 'package:flowday/repositories/task_repository.dart';
 import 'package:flowday/views/calendar_view.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    hide GlobalMaterialLocalizations, GlobalCupertinoLocalizations;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -26,13 +28,13 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: controller,
-        child: const MaterialApp(
+        child: MaterialApp(
           locale: Locale('pt', 'BR'),
           supportedLocales: [Locale('pt', 'BR')],
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
           ],
           home: CalendarView(),
         ),

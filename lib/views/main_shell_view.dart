@@ -5,7 +5,7 @@ import 'package:flowday/views/home_tasks_view.dart';
 import 'package:flowday/views/profile_view.dart';
 import 'package:flowday/widgets/flow_bottom_bar.dart';
 import 'package:flowday/widgets/task_sync_feedback.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MainShellView extends StatefulWidget {
   final TaskController taskController;

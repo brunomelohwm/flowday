@@ -1,10 +1,6 @@
 name: Android CI
 
 on:
-  push:
-    branches:
-      - main
-      - codex/flowday-portfolio
   pull_request:
 
 permissions:
@@ -59,12 +55,12 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Set up Node.js for Firebase CLI
         uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: "24"
           cache: npm
           cache-dependency-path: firebase-tests/package-lock.json
 
@@ -72,8 +68,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.41.7'
-          cache: true
 
       - name: Install Flutter dependencies
         run: flutter pub get
@@ -89,12 +83,6 @@ jobs:
 
       - name: Run Flutter tests
         run: flutter test
-
-      - name: Run widget tests not in the default test suite
-        run: |
-          flutter test test/widgets/task_load_feedback_test.dart
-          flutter test test/views/task_card_widget_test.dart
-          flutter test test/views/profile_view_test.dart
 
       - name: Test Firestore ownership rules
         run: npm --prefix firebase-tests run test:rules

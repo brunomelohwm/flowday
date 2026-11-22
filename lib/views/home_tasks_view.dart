@@ -8,7 +8,7 @@ import 'package:flowday/views/completed_tasks_view.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
 import 'package:flowday/themes/app_colors.dart';
 import 'package:flowday/themes/app_spacing.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:provider/provider.dart';

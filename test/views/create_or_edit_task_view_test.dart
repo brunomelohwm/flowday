@@ -8,7 +8,7 @@ import 'package:flowday/models/user.dart';
 import 'package:flowday/repositories/auth_repository.dart';
 import 'package:flowday/repositories/task_repository.dart';
 import 'package:flowday/views/create_or_edit_task_view.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';

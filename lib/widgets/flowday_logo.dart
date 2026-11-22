@@ -1,5 +1,5 @@
 import 'package:flowday/themes/app_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class FlowDayLogo extends StatelessWidget {
   final double iconSize;

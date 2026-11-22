@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flowday/models/user.dart';
 import 'package:flowday/repositories/auth_repository.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController({required AuthRepository repository})

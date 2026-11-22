@@ -1,7 +1,7 @@
 import 'package:flowday/controllers/task_controller.dart';
 import 'package:flowday/themes/app_colors.dart';
 import 'package:flowday/themes/app_spacing.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TaskSyncFeedback extends StatelessWidget {
   const TaskSyncFeedback({super.key, required this.controller});
